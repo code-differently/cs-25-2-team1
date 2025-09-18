@@ -269,18 +269,7 @@ public class MembershipManagement {
         nextMemberId = 1;
     }
     
-    /**
-     * Check if a specific member's payment is overdue
-     * @param memberId ID of the member to check
-     * @return True if the member exists and their payment is overdue, false otherwise
-     */
-    public boolean isMemberPaymentOverdue(int memberId) {
-        Member member = members.get(memberId);
-        if (member != null) {
-            return member.isPaymentOverdue();
-        }
-        return false;
-    }
+    
     
     /**
      * Get all members with overdue payments
