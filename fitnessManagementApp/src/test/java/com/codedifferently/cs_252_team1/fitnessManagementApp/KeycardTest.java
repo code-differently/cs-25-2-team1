@@ -6,98 +6,91 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class KeycardTest {
     
+    private Member testMember;
+    private Employee testEmployee;
+    private KeyCard memberKeycard;
+    private KeyCard employeeKeycard;
+    
+    @BeforeEach
+    public void setUp() {
+        // Create test member
+        testMember = new Member();
+        testMember.setFirstName("John");
+        testMember.setLastName("Doe");
+        testMember.setEmail("john.doe@email.com");
+        testMember.setPhoneNumber("555-1234");
+        
+        // Create test employee
+        testEmployee = new Employee();
+        testEmployee.setFirstName("Jane");
+        testEmployee.setLastName("Smith");
+        testEmployee.setEmail("jane.smith@fitness.com");
+        testEmployee.setPhoneNumber("555-0123");
+        
+        // Create test keycards
+        memberKeycard = new KeyCard("MEM12345", testMember, LocalDate.now().plusYears(1));
+        employeeKeycard = new KeyCard("EMP67890", testEmployee, LocalDate.now().plusYears(2));
+    }
+    
     @Test
     public void testKeycardCreation() {
-        // Create a member for testing
-        Member member = new Member();
-        member.setFirstName("John");
-        member.setLastName("Doe");
-        
-        // Create keycard for member
-        KeyCard keycard = new KeyCard("12345", member, LocalDate.now().plusYears(1));
-        assertNotNull(keycard);
-        assertEquals("12345", keycard.getCardNumber());
-        assertEquals("John Doe", keycard.getCardHolderName());
+        // Test member keycard creation using setup objects
+        assertNotNull(memberKeycard);
+        assertEquals("MEM12345", memberKeycard.getCardNumber());
+        assertEquals("John Doe", memberKeycard.getCardHolderName());
+        assertTrue(memberKeycard.isMemberCard());
+        assertFalse(memberKeycard.isEmployeeCard());
     }
 
     @Test
     public void testKeycardAccess() {
-        // Create a member for testing
-        Member member = new Member();
-        member.setFirstName("John");
-        member.setLastName("Doe");
-        
-        // Create keycard for member
-        KeyCard keycard = new KeyCard("12345", member, LocalDate.now().plusYears(1));
-        assertTrue(keycard.isValid()); // KeyCard uses isValid() instead of hasAccess()
-        assertTrue(keycard.isActive());
+        // Test keycard access using setup objects
+        assertTrue(memberKeycard.isValid());
+        assertTrue(memberKeycard.isActive());
+        assertTrue(employeeKeycard.isValid());
+        assertTrue(employeeKeycard.isActive());
     }
 
     @Test
     public void testKeycardRevocation() {
-        // Create a member for testing
-        Member member = new Member();
-        member.setFirstName("John");
-        member.setLastName("Doe");
-        
-        // Create keycard for member
-        KeyCard keycard = new KeyCard("12345", member, LocalDate.now().plusYears(1));
-        
         // Initially should be valid
-        assertTrue(keycard.isValid());
+        assertTrue(memberKeycard.isValid());
         
         // Deactivate the card (equivalent to revoking access)
-        keycard.deactivate();
-        assertFalse(keycard.isValid());
-        assertFalse(keycard.isActive());
+        memberKeycard.deactivate();
+        assertFalse(memberKeycard.isValid());
+        assertFalse(memberKeycard.isActive());
     }
 
     @Test
     public void testEmployeeKeycardCreation() {
-        // Create an employee for testing
-        Employee employee = new Employee();
-        employee.setFirstName("Jane");
-        employee.setLastName("Smith");
-        employee.setEmail("jane.smith@fitness.com");
-        employee.setPhoneNumber("555-0123");
-        
-        // Create keycard for employee
-        KeyCard keycard = new KeyCard("EMP001", employee, LocalDate.now().plusYears(2));
-        
-        assertNotNull(keycard);
-        assertEquals("EMP001", keycard.getCardNumber());
-        assertEquals("Jane Smith", keycard.getCardHolderName());
-        assertEquals("jane.smith@fitness.com", keycard.getCardHolderEmail());
-        assertEquals("555-0123", keycard.getCardHolderPhone());
-        assertTrue(keycard.isEmployeeCard());
-        assertFalse(keycard.isMemberCard());
-        assertEquals(KeyCardType.EMPLOYEE, keycard.getCardType());
+        // Test employee keycard creation using setup objects
+        assertNotNull(employeeKeycard);
+        assertEquals("EMP67890", employeeKeycard.getCardNumber());
+        assertEquals("Jane Smith", employeeKeycard.getCardHolderName());
+        assertEquals("jane.smith@fitness.com", employeeKeycard.getCardHolderEmail());
+        assertEquals("555-0123", employeeKeycard.getCardHolderPhone());
+        assertTrue(employeeKeycard.isEmployeeCard());
+        assertFalse(employeeKeycard.isMemberCard());
+        assertEquals(KeyCardType.EMPLOYEE, employeeKeycard.getCardType());
     }
 
     @Test
     public void testMemberKeycardCreation() {
-        // Create a member for testing
-        Member member = new Member();
-        member.setFirstName("Bob");
-        member.setLastName("Johnson");
-        member.setEmail("bob.johnson@email.com");
-        member.setPhoneNumber("555-9876");
-        
-        // Create keycard for member
-        KeyCard keycard = new KeyCard("MEM001", member, LocalDate.now().plusYears(1));
-        
-        assertNotNull(keycard);
-        assertEquals("MEM001", keycard.getCardNumber());
-        assertEquals("Bob Johnson", keycard.getCardHolderName());
-        assertEquals("bob.johnson@email.com", keycard.getCardHolderEmail());
-        assertEquals("555-9876", keycard.getCardHolderPhone());
-        assertTrue(keycard.isMemberCard());
-        assertFalse(keycard.isEmployeeCard());
-        assertEquals(KeyCardType.MEMBER, keycard.getCardType());
+        // Test member keycard creation using setup objects
+        assertNotNull(memberKeycard);
+        assertEquals("MEM12345", memberKeycard.getCardNumber());
+        assertEquals("John Doe", memberKeycard.getCardHolderName());
+        assertEquals("john.doe@email.com", memberKeycard.getCardHolderEmail());
+        assertEquals("555-1234", memberKeycard.getCardHolderPhone());
+        assertTrue(memberKeycard.isMemberCard());
+        assertFalse(memberKeycard.isEmployeeCard());
+        assertEquals(KeyCardType.MEMBER, memberKeycard.getCardType());
     }
 
     @Test
@@ -125,48 +118,36 @@ public class KeycardTest {
 
     @Test
     public void testKeycardActivationDeactivation() {
-        Member member = new Member();
-        member.setFirstName("Charlie");
-        member.setLastName("Wilson");
-        
-        KeyCard keycard = new KeyCard("98765", member, LocalDate.now().plusYears(1));
-        
         // Initially active and valid
-        assertTrue(keycard.isActive());
-        assertTrue(keycard.isValid());
+        assertTrue(employeeKeycard.isActive());
+        assertTrue(employeeKeycard.isValid());
         
         // Deactivate
-        keycard.deactivate();
-        assertFalse(keycard.isActive());
-        assertFalse(keycard.isValid());
+        employeeKeycard.deactivate();
+        assertFalse(employeeKeycard.isActive());
+        assertFalse(employeeKeycard.isValid());
         
         // Reactivate
-        keycard.activate();
-        assertTrue(keycard.isActive());
-        assertTrue(keycard.isValid());
+        employeeKeycard.activate();
+        assertTrue(employeeKeycard.isActive());
+        assertTrue(employeeKeycard.isValid());
     }
 
     @Test
     public void testAccessRecording() {
-        Member member = new Member();
-        member.setFirstName("David");
-        member.setLastName("Miller");
-        
-        KeyCard keycard = new KeyCard("11111", member, LocalDate.now().plusYears(1));
-        
         // Initially no access recorded
-        assertEquals(null, keycard.getLastAccessTime());
-        assertEquals(null, keycard.getLastAccessLocation());
+        assertEquals(null, memberKeycard.getLastAccessTime());
+        assertEquals(null, memberKeycard.getLastAccessLocation());
         
         // Record access
-        keycard.recordAccess("Main Entrance");
+        memberKeycard.recordAccess("Main Entrance");
         
-        assertNotNull(keycard.getLastAccessTime());
-        assertEquals("Main Entrance", keycard.getLastAccessLocation());
+        assertNotNull(memberKeycard.getLastAccessTime());
+        assertEquals("Main Entrance", memberKeycard.getLastAccessLocation());
         
         // Record another access
-        keycard.recordAccess("Gym Floor");
-        assertEquals("Gym Floor", keycard.getLastAccessLocation());
+        memberKeycard.recordAccess("Gym Floor");
+        assertEquals("Gym Floor", memberKeycard.getLastAccessLocation());
     }
 
     @Test
