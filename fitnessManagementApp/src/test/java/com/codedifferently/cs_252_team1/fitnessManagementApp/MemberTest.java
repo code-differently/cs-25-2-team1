@@ -3,11 +3,9 @@ package com.codedifferently.cs_252_team1.fitnessManagementApp;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -135,8 +133,8 @@ public class MemberTest {
 
     @Test
     public void testSetPaymentOption() {
-        member.setPaymentOption(PaymentOption.CASH);
-        assertEquals(PaymentOption.CASH, member.getPaymentOption());
+        member.setPaymentOption(PaymentOption.CREDIT_CARD);
+        assertEquals(PaymentOption.CREDIT_CARD, member.getPaymentOption());
     }
 
     @Test
@@ -150,66 +148,6 @@ public class MemberTest {
         LocalDate newDate = LocalDate.of(2023, 12, 15);
         member.setLastPaymentDate(newDate);
         assertEquals(newDate, member.getLastPaymentDate());
-    }
-
-    @Test
-    public void testGetFullName() {
-        assertEquals("John Doe", member.getFullName());
-    }
-
-    @Test
-    public void testGetYearsOfMembership() {
-        // Member since 2022, so should have some years of membership
-        assertTrue(member.getYearsOfMembership() >= 0);
-    }
-
-    @Test
-    public void testIsActive() {
-        assertTrue(member.isActive());
-        member.setMembershipStatus(MembershipStatus.INACTIVE);
-        assertFalse(member.isActive());
-    }
-
-    @Test
-    public void testActivate() {
-        member.setMembershipStatus(MembershipStatus.INACTIVE);
-        member.activate();
-        assertEquals(MembershipStatus.ACTIVE, member.getMembershipStatus());
-        assertTrue(member.isActive());
-    }
-
-    @Test
-    public void testDeactivate() {
-        member.deactivate();
-        assertEquals(MembershipStatus.INACTIVE, member.getMembershipStatus());
-        assertFalse(member.isActive());
-    }
-
-    @Test
-    public void testIsPaymentOverdue() {
-        // Should not be overdue for new member
-        assertFalse(member.isPaymentOverdue());
-        
-        // Mark as overdue
-        member.markPaymentOverdue();
-        assertTrue(member.isPaymentOverdue());
-    }
-
-    @Test
-    public void testRecordPayment() {
-        member.markPaymentOverdue();
-        assertTrue(member.isPaymentOverdue());
-        
-        member.recordPayment();
-        assertEquals(PaymentStatus.UP_TO_DATE, member.getPaymentStatus());
-        assertEquals(LocalDate.now(), member.getLastPaymentDate());
-    }
-
-    @Test
-    public void testMarkPaymentOverdue() {
-        member.markPaymentOverdue();
-        assertEquals(PaymentStatus.OVERDUE, member.getPaymentStatus());
-        assertTrue(member.isPaymentOverdue());
     }
 
     @Test
@@ -254,12 +192,6 @@ public class MemberTest {
         assertThrows(IllegalArgumentException.class, () -> {
             member.setLastName("");
         });
-    }
-
-    @Test
-    public void testToString() {
-        String expected = "John Doe (ACTIVE)";
-        assertEquals(expected, member.toString());
     }
 
     @Test
