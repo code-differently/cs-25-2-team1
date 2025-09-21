@@ -1,13 +1,16 @@
 package com.codedifferently.cs_252_team1.fitnessManagementApp;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.List;
-import java.util.ArrayList;
-import java.time.LocalDate;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class EmployeeManager {
     private final Map<Integer, Employee> employeeMap;
     private final AtomicInteger idCounter;
