@@ -2,7 +2,6 @@ package com.codedifferently.cs_252_team1.fitnessManagementApp;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -30,33 +29,41 @@ public class EmployeeManager {
     }
 
     // Retrieve an employee by ID
-    public Optional<Employee> getEmployeeById(int employeeId) {
-        return Optional.ofNullable(employeeMap.get(employeeId));
+    public Employee getEmployeeById(int employeeId) throws EmployeeNotFoundException {
+        Employee employee = employeeMap.get(employeeId);
+        if (employee == null) {
+            throw new EmployeeNotFoundException(employeeId);
+        }
+        return employee;
     }
 
     // Update an existing employee
-    public boolean updateEmployee(int employeeId, String firstName, String lastName, String email, 
+    public Employee updateEmployee(int employeeId, String firstName, String lastName, String email, 
                                   String phoneNumber, String department, String position, 
-                                  double salary, LocalDate hireDate, WorkStatus workStatus) {
+                                  double salary, LocalDate hireDate, WorkStatus workStatus) throws EmployeeNotFoundException {
         Employee existingEmployee = employeeMap.get(employeeId);
-        if (existingEmployee != null) {
-            existingEmployee.setFirstName(firstName);
-            existingEmployee.setLastName(lastName);
-            existingEmployee.setEmail(email);
-            existingEmployee.setPhoneNumber(phoneNumber);
-            existingEmployee.setDepartment(department);
-            existingEmployee.setPosition(position);
-            existingEmployee.setSalary(salary);
-            existingEmployee.setHireDate(hireDate);
-            existingEmployee.setWorkStatus(workStatus);
-            return true;
+        if (existingEmployee == null) {
+            throw new EmployeeNotFoundException(employeeId);
         }
-        return false;
+        existingEmployee.setFirstName(firstName);
+        existingEmployee.setLastName(lastName);
+        existingEmployee.setEmail(email);
+        existingEmployee.setPhoneNumber(phoneNumber);
+        existingEmployee.setDepartment(department);
+        existingEmployee.setPosition(position);
+        existingEmployee.setSalary(salary);
+        existingEmployee.setHireDate(hireDate);
+        existingEmployee.setWorkStatus(workStatus);
+        return existingEmployee;
     }
 
     // Delete an employee by ID
-    public boolean deleteEmployee(int employeeId) {
-        return employeeMap.remove(employeeId) != null;
+    public Employee deleteEmployee(int employeeId) throws EmployeeNotFoundException {
+        Employee removedEmployee = employeeMap.remove(employeeId);
+        if (removedEmployee == null) {
+            throw new EmployeeNotFoundException(employeeId);
+        }
+        return removedEmployee;
     }
 
     // List all employees
