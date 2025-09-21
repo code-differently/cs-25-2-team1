@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.stereotype.Service;
+
 /**
  * MembershipManagement class provides functionality for administrators to 
  * add, update, and remove members from the fitness management system.
@@ -14,6 +16,7 @@ import java.util.Map;
  * "As an administrator, I want to add, update, or remove members so that 
  * I can keep internal records accurate and up to date."
  */
+@Service
 public class MembershipManagement {
     private Map<Integer, Member> members;
     private int nextMemberId;

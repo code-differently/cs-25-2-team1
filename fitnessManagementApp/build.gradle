@@ -28,6 +28,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'info.picocli:picocli:4.7.6'
+    implementation 'info.picocli:picocli-spring-boot-starter:4.7.6'
 }
 
 tasks.named('test') {

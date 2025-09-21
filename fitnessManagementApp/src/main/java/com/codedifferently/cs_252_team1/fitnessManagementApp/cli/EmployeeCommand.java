@@ -1,0 +1,157 @@
+package com.codedifferently.cs_252_team1.fitnessManagementApp.cli;
+
+import com.codedifferently.cs_252_team1.fitnessManagementApp.EmployeeManager;
+import com.codedifferently.cs_252_team1.fitnessManagementApp.Employee;
+import com.codedifferently.cs_252_team1.fitnessManagementApp.WorkStatus;
+import com.codedifferently.cs_252_team1.fitnessManagementApp.EmployeeNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
+import java.time.LocalDate;
+
+@Component
+@Command(name = "employee", description = "Manage gym employees",
+         subcommands = {
+             EmployeeCommand.AddEmployeeCommand.class,
+             EmployeeCommand.RemoveEmployeeCommand.class,
+             EmployeeCommand.ListEmployeesCommand.class,
+             EmployeeCommand.GetEmployeeCommand.class
+         })
+public class EmployeeCommand implements Runnable {
+
+    @Override
+    public void run() {
+        System.out.println("Use a subcommand: add, remove, list, get");
+    }
+
+    @Component
+    @Command(name = "add", description = "Add a new employee")
+    public static class AddEmployeeCommand implements Runnable {
+        
+        @Autowired
+        private EmployeeManager employeeManager;
+
+        @Option(names = {"-f", "--firstname"}, required = true, description = "Employee first name")
+        private String firstName;
+
+        @Option(names = {"-l", "--lastname"}, required = true, description = "Employee last name")
+        private String lastName;
+
+        @Option(names = {"-e", "--email"}, required = true, description = "Employee email")
+        private String email;
+
+        @Option(names = {"-p", "--phone"}, required = true, description = "Employee phone")
+        private String phone;
+
+        @Option(names = {"-d", "--department"}, required = true, description = "Employee department")
+        private String department;
+
+        @Option(names = {"-pos", "--position"}, required = true, description = "Employee position")
+        private String position;
+
+        @Option(names = {"-sal", "--salary"}, required = true, description = "Employee salary")
+        private double salary;
+
+        @Option(names = {"-s", "--status"}, description = "Work status (ACTIVE, INACTIVE, TERMINATED, ON_LEAVE)")
+        private WorkStatus workStatus = WorkStatus.ACTIVE;
+
+        @Override
+        public void run() {
+            try {
+                Employee employee = employeeManager.addEmployee(firstName, lastName, email, phone, 
+                                                               department, position, salary, LocalDate.now(), workStatus);
+                System.out.printf("✅ Employee '%s %s' added successfully with ID: %d%n", firstName, lastName, employee.getEmployeeId());
+            } catch (Exception e) {
+                System.err.printf("❌ Error adding employee: %s%n", e.getMessage());
+            }
+        }
+    }
+
+    @Component
+    @Command(name = "remove", description = "Remove an employee")
+    public static class RemoveEmployeeCommand implements Runnable {
+        
+        @Autowired
+        private EmployeeManager employeeManager;
+
+        @Parameters(index = "0", description = "Employee ID to remove")
+        private int employeeId;
+
+        @Override
+        public void run() {
+            try {
+                Employee removedEmployee = employeeManager.deleteEmployee(employeeId);
+                System.out.printf("✅ Employee '%s %s' (ID: %d) removed successfully%n", 
+                    removedEmployee.getFirstName(), removedEmployee.getLastName(), employeeId);
+            } catch (EmployeeNotFoundException e) {
+                System.err.printf("❌ Employee not found: %s%n", e.getMessage());
+            } catch (Exception e) {
+                System.err.printf("❌ Error removing employee: %s%n", e.getMessage());
+            }
+        }
+    }
+
+    @Component
+    @Command(name = "list", description = "List all employees")
+    public static class ListEmployeesCommand implements Runnable {
+        
+        @Autowired
+        private EmployeeManager employeeManager;
+
+        @Override
+        public void run() {
+            var employees = employeeManager.listAllEmployees();
+            if (employees.isEmpty()) {
+                System.out.println("📝 No employees found");
+            } else {
+                System.out.println("👥 All Employees:");
+                System.out.println("═".repeat(80));
+                employees.forEach(employee -> {
+                    System.out.printf("ID: %d | Name: %s %s | Dept: %s | Position: %s | Status: %s%n",
+                        employee.getEmployeeId(),
+                        employee.getFirstName(),
+                        employee.getLastName(),
+                        employee.getDepartment(),
+                        employee.getPosition(),
+                        employee.getWorkStatus());
+                });
+            }
+        }
+    }
+
+    @Component
+    @Command(name = "get", description = "Get employee details")
+    public static class GetEmployeeCommand implements Runnable {
+        
+        @Autowired
+        private EmployeeManager employeeManager;
+
+        @Parameters(index = "0", description = "Employee ID")
+        private int employeeId;
+
+        @Override
+        public void run() {
+            try {
+                Employee employee = employeeManager.getEmployeeById(employeeId);
+                System.out.println("👤 Employee Details:");
+                System.out.println("═".repeat(50));
+                System.out.printf("ID: %d%n", employee.getEmployeeId());
+                System.out.printf("Name: %s %s%n", employee.getFirstName(), employee.getLastName());
+                System.out.printf("Email: %s%n", employee.getEmail());
+                System.out.printf("Phone: %s%n", employee.getPhoneNumber());
+                System.out.printf("Department: %s%n", employee.getDepartment());
+                System.out.printf("Position: %s%n", employee.getPosition());
+                System.out.printf("Salary: $%.2f%n", employee.getSalary());
+                System.out.printf("Work Status: %s%n", employee.getWorkStatus());
+                System.out.printf("Hire Date: %s%n", employee.getHireDate());
+                System.out.printf("Years of Service: %d%n", employee.getYearsOfService());
+            } catch (EmployeeNotFoundException e) {
+                System.err.printf("❌ Employee not found: %s%n", e.getMessage());
+            } catch (Exception e) {
+                System.err.printf("❌ Error getting employee: %s%n", e.getMessage());
+            }
+        }
+    }
+}
