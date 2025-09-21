@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * MembershipManagement class provides functionality for administrators to 
@@ -103,15 +102,16 @@ public class MembershipManagement {
      * @param membershipType New membership type (null to keep current)
      * @param paymentOption New payment option (null to keep current)
      * @param membershipStatus New membership status (null to keep current)
-     * @return Updated Member object, or null if member not found
+     * @return Updated Member object
+     * @throws MemberNotFoundException if member with given ID is not found
      */
     public Member updateMember(int memberId, String firstName, String lastName, 
                               String email, String phoneNumber, MembershipType membershipType,
-                              PaymentOption paymentOption, MembershipStatus membershipStatus) {
+                              PaymentOption paymentOption, MembershipStatus membershipStatus) throws MemberNotFoundException {
         
         Member member = members.get(memberId);
         if (member == null) {
-            return null;
+            throw new MemberNotFoundException(memberId);
         }
         
         // Update fields if new values are provided
@@ -143,19 +143,29 @@ public class MembershipManagement {
     /**
      * Remove a member from the system
      * @param memberId ID of the member to remove
-     * @return True if member was found and removed, false otherwise
+     * @return The removed Member object
+     * @throws MemberNotFoundException if member with given ID is not found
      */
-    public boolean removeMember(int memberId) {
-        return members.remove(memberId) != null;
+    public Member removeMember(int memberId) throws MemberNotFoundException {
+        Member removedMember = members.remove(memberId);
+        if (removedMember == null) {
+            throw new MemberNotFoundException(memberId);
+        }
+        return removedMember;
     }
     
     /**
      * Find a member by ID
      * @param memberId ID of the member to find
-     * @return Optional containing the member if found, empty otherwise
+     * @return The Member object
+     * @throws MemberNotFoundException if member with given ID is not found
      */
-    public Optional<Member> findMemberById(int memberId) {
-        return Optional.ofNullable(members.get(memberId));
+    public Member findMemberById(int memberId) throws MemberNotFoundException {
+        Member member = members.get(memberId);
+        if (member == null) {
+            throw new MemberNotFoundException(memberId);
+        }
+        return member;
     }
     
     /**
@@ -228,29 +238,31 @@ public class MembershipManagement {
     /**
      * Activate a member's membership
      * @param memberId ID of the member to activate
-     * @return True if member was found and activated, false otherwise
+     * @return The activated Member object
+     * @throws MemberNotFoundException if member with given ID is not found
      */
-    public boolean activateMember(int memberId) {
+    public Member activateMember(int memberId) throws MemberNotFoundException {
         Member member = members.get(memberId);
-        if (member != null) {
-            member.activate();
-            return true;
+        if (member == null) {
+            throw new MemberNotFoundException(memberId);
         }
-        return false;
+        member.activate();
+        return member;
     }
     
     /**
      * Deactivate a member's membership
      * @param memberId ID of the member to deactivate
-     * @return True if member was found and deactivated, false otherwise
+     * @return The deactivated Member object
+     * @throws MemberNotFoundException if member with given ID is not found
      */
-    public boolean deactivateMember(int memberId) {
+    public Member deactivateMember(int memberId) throws MemberNotFoundException {
         Member member = members.get(memberId);
-        if (member != null) {
-            member.deactivate();
-            return true;
+        if (member == null) {
+            throw new MemberNotFoundException(memberId);
         }
-        return false;
+        member.deactivate();
+        return member;
     }
     
     /**
@@ -288,29 +300,31 @@ public class MembershipManagement {
     /**
      * Record a payment for a specific member
      * @param memberId ID of the member making the payment
-     * @return True if member was found and payment recorded, false otherwise
+     * @return The Member object with updated payment
+     * @throws MemberNotFoundException if member with given ID is not found
      */
-    public boolean recordMemberPayment(int memberId) {
+    public Member recordMemberPayment(int memberId) throws MemberNotFoundException {
         Member member = members.get(memberId);
-        if (member != null) {
-            member.recordPayment();
-            return true;
+        if (member == null) {
+            throw new MemberNotFoundException(memberId);
         }
-        return false;
+        member.recordPayment();
+        return member;
     }
     
     /**
      * Mark a member's payment as overdue
      * @param memberId ID of the member whose payment is overdue
-     * @return True if member was found and marked as overdue, false otherwise
+     * @return The Member object with updated payment status
+     * @throws MemberNotFoundException if member with given ID is not found
      */
-    public boolean markMemberPaymentOverdue(int memberId) {
+    public Member markMemberPaymentOverdue(int memberId) throws MemberNotFoundException {
         Member member = members.get(memberId);
-        if (member != null) {
-            member.markPaymentOverdue();
-            return true;
+        if (member == null) {
+            throw new MemberNotFoundException(memberId);
         }
-        return false;
+        member.markPaymentOverdue();
+        return member;
     }
     
     /**
