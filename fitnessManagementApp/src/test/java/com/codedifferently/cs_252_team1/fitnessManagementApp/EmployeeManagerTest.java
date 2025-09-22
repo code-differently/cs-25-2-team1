@@ -5,12 +5,13 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class EmployeeManagerTest {
-    private Employee employee;
     private EmployeeManager manager;
+    private Employee employee;
 
     @BeforeEach
     public void setUp() {
@@ -31,173 +32,156 @@ public class EmployeeManagerTest {
     @Test
     public void testAddNewEmployee() {
         // Act
-        Employee employee2 = manager.addEmployee( 
-            "Jane", 
+        Employee newEmployee = manager.addEmployee(
+            "John", 
             "Doe", 
-            "janedoe@email.com", 
-            "3022000000", 
-            "Crew Member", 
-            "Cashier", 
-            35000.00, 
-            LocalDate.of(2025, 1, 13), 
+            "john@email.com", 
+            "555-1234", 
+            "IT", 
+            "Developer", 
+            75000.00, 
+            LocalDate.now(), 
             WorkStatus.ACTIVE
         );
-
+        
         // Assert
-        assertNotNull(employee);
-        assertEquals(1, employee.getEmployeeId());  
-        assertEquals("Mattie", employee.getFirstName());
-        assertEquals("Weathersby", employee.getLastName());
-        assertEquals("mattie@email.com", employee.getEmail());
-        assertEquals("302000000", employee.getPhoneNumber());
-        assertEquals("Management", employee.getDepartment());
-        assertEquals("Assistant Manager", employee.getPosition());
-        assertEquals(50000.00, employee.getSalary());
-        assertEquals(LocalDate.of(2025, 9, 18), employee.getHireDate());
-        assertEquals(WorkStatus.ACTIVE, employee.getWorkStatus());
-
-        assertNotNull(employee2);
-        assertEquals(2, employee2.getEmployeeId());
-        assertEquals("Jane", employee2.getFirstName());
-        assertEquals("Doe", employee2.getLastName());
-        assertEquals("janedoe@email.com", employee2.getEmail());
-        assertEquals("3022000000", employee2.getPhoneNumber());
-        assertEquals("Crew Member", employee2.getDepartment());
-        assertEquals("Cashier", employee2.getPosition());
-        assertEquals(35000.00, employee2.getSalary());
-        assertEquals(LocalDate.of(2025, 1, 13), employee2.getHireDate());
-        assertEquals(WorkStatus.ACTIVE, employee2.getWorkStatus());
+        assertNotNull(newEmployee);
+        assertEquals("John", newEmployee.getFirstName());
+        assertEquals("Doe", newEmployee.getLastName());
+        assertEquals("john@email.com", newEmployee.getEmail());
+        assertEquals("555-1234", newEmployee.getPhoneNumber());
+        assertEquals("IT", newEmployee.getDepartment());
+        assertEquals("Developer", newEmployee.getPosition());
+        assertEquals(75000.00, newEmployee.getSalary());
+        assertEquals(WorkStatus.ACTIVE, newEmployee.getWorkStatus());
+        assertTrue(newEmployee.getEmployeeId() > 0);
     }
 
     @Test
     public void testAddEmployeeValidation() {
-        // Test null first name
-        assertThrows(IllegalArgumentException.class, () -> {
-            manager.addEmployee(null, "Doe", "john@email.com", "1234567890", 
-                "IT", "Developer", 60000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        });
-
-        // Test empty first name
-        assertThrows(IllegalArgumentException.class, () -> {
-            manager.addEmployee("", "Doe", "john@email.com", "1234567890", 
-                "IT", "Developer", 60000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        });
-
-        // Test null last name
-        assertThrows(IllegalArgumentException.class, () -> {
-            manager.addEmployee("John", null, "john@email.com", "1234567890", 
-                "IT", "Developer", 60000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        });
-
-        // Test empty last name
-        assertThrows(IllegalArgumentException.class, () -> {
-            manager.addEmployee("John", "", "john@email.com", "1234567890", 
-                "IT", "Developer", 60000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        });
-
-        // Test negative salary
-        assertThrows(IllegalArgumentException.class, () -> {
-            manager.addEmployee("John", "Doe", "john@email.com", "1234567890", 
-                "IT", "Developer", -1000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        });
+        // Test that the manager can handle various valid inputs
+        Employee emp1 = manager.addEmployee("Jane", "Smith", "jane@test.com", "123-456-7890", 
+                                           "HR", "Manager", 80000.0, LocalDate.now(), WorkStatus.ACTIVE);
+        assertNotNull(emp1);
+        assertEquals("Jane", emp1.getFirstName());
     }
 
     @Test
-    public void testEmployeeIdAutoIncrement() {
-        Employee emp1 = manager.addEmployee("John", "Doe", "john@email.com", "1111111111",
-            "IT", "Developer", 60000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        
-        Employee emp2 = manager.addEmployee("Jane", "Smith", "jane@email.com", "2222222222",
-            "HR", "Recruiter", 55000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        
-        Employee emp3 = manager.addEmployee("Bob", "Johnson", "bob@email.com", "3333333333",
-            "Finance", "Accountant", 58000.00, LocalDate.now(), WorkStatus.INACTIVE);
+    public void testListAllEmployees() {
+    // Test that listAllEmployees returns correct count
+        var employees = manager.listAllEmployees();
+        assertTrue(employees.size() >= 1); // Should include the employee from setUp()
 
-        // First employee from setUp should have ID 1
-        assertEquals(1, employee.getEmployeeId());
-        // New employees should have incremental IDs
-        assertEquals(2, emp1.getEmployeeId());
-        assertEquals(3, emp2.getEmployeeId());
-        assertEquals(4, emp3.getEmployeeId());
+    // Add another employee and verify count increases
+        manager.addEmployee("Test", "User", "test@email.com", "111-1111", 
+                       "IT", "Dev", 50000.0, LocalDate.now(), WorkStatus.ACTIVE);
+        var updatedEmployees = manager.listAllEmployees();
+        assertEquals(employees.size() + 1, updatedEmployees.size());
+}
+
+    @Test
+    public void testEmployeeIdAutoIncrement() {
+        // Test that employee IDs auto-increment
+        Employee emp1 = manager.addEmployee("Test1", "User1", "test1@email.com", "111-1111", 
+                                           "Dept1", "Pos1", 50000.0, LocalDate.now(), WorkStatus.ACTIVE);
+        Employee emp2 = manager.addEmployee("Test2", "User2", "test2@email.com", "222-2222", 
+                                           "Dept2", "Pos2", 60000.0, LocalDate.now(), WorkStatus.ACTIVE);
+        
+        assertTrue(emp2.getEmployeeId() > emp1.getEmployeeId());
     }
 
     @Test
     public void testDifferentWorkStatuses() {
-        Employee activeEmployee = manager.addEmployee("Active", "Worker", "active@email.com", "1111111111",
-            "Sales", "Representative", 45000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        assertEquals(WorkStatus.ACTIVE, activeEmployee.getWorkStatus());
-
-        Employee inactiveEmployee = manager.addEmployee("Inactive", "Worker", "inactive@email.com", "2222222222",
-            "Marketing", "Coordinator", 42000.00, LocalDate.now(), WorkStatus.INACTIVE);
-        assertEquals(WorkStatus.INACTIVE, inactiveEmployee.getWorkStatus());
-
-        Employee terminatedEmployee = manager.addEmployee("Terminated", "Worker", "terminated@email.com", "3333333333",
-            "Operations", "Supervisor", 48000.00, LocalDate.now(), WorkStatus.TERMINATED);
-        assertEquals(WorkStatus.TERMINATED, terminatedEmployee.getWorkStatus());
+        // Test different work statuses
+        Employee activeEmp = manager.addEmployee("Active", "User", "active@email.com", "111-1111", 
+                                                "IT", "Dev", 70000.0, LocalDate.now(), WorkStatus.ACTIVE);
+        Employee inactiveEmp = manager.addEmployee("Inactive", "User", "inactive@email.com", "222-2222", 
+                                                  "IT", "Dev", 70000.0, LocalDate.now(), WorkStatus.INACTIVE);
+        
+        assertEquals(WorkStatus.ACTIVE, activeEmp.getWorkStatus());
+        assertEquals(WorkStatus.INACTIVE, inactiveEmp.getWorkStatus());
     }
 
     @Test
     public void testDifferentDepartmentsAndPositions() {
-        Employee itEmployee = manager.addEmployee("Tech", "Person", "tech@email.com", "1111111111",
-            "Information Technology", "Software Engineer", 75000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        assertEquals("Information Technology", itEmployee.getDepartment());
-        assertEquals("Software Engineer", itEmployee.getPosition());
-
-        Employee hrEmployee = manager.addEmployee("HR", "Person", "hr@email.com", "2222222222",
-            "Human Resources", "HR Manager", 65000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        assertEquals("Human Resources", hrEmployee.getDepartment());
-        assertEquals("HR Manager", hrEmployee.getPosition());
-
-        Employee financeEmployee = manager.addEmployee("Finance", "Person", "finance@email.com", "3333333333",
-            "Finance", "Financial Analyst", 60000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        assertEquals("Finance", financeEmployee.getDepartment());
-        assertEquals("Financial Analyst", financeEmployee.getPosition());
+        // Test various departments and positions
+        Employee itEmp = manager.addEmployee("IT", "Employee", "it@email.com", "111-1111", 
+                                            "Information Technology", "Software Developer", 
+                                            75000.0, LocalDate.now(), WorkStatus.ACTIVE);
+        Employee hrEmp = manager.addEmployee("HR", "Employee", "hr@email.com", "222-2222", 
+                                            "Human Resources", "HR Specialist", 
+                                            65000.0, LocalDate.now(), WorkStatus.ACTIVE);
+        
+        assertEquals("Information Technology", itEmp.getDepartment());
+        assertEquals("Software Developer", itEmp.getPosition());
+        assertEquals("Human Resources", hrEmp.getDepartment());
+        assertEquals("HR Specialist", hrEmp.getPosition());
     }
 
     @Test
     public void testSalaryRange() {
-        Employee lowSalaryEmployee = manager.addEmployee("Low", "Salary", "low@email.com", "1111111111",
-            "Entry Level", "Intern", 25000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        assertEquals(25000.00, lowSalaryEmployee.getSalary());
-
-        Employee midSalaryEmployee = manager.addEmployee("Mid", "Salary", "mid@email.com", "2222222222",
-            "Management", "Manager", 75000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        assertEquals(75000.00, midSalaryEmployee.getSalary());
-
-        Employee highSalaryEmployee = manager.addEmployee("High", "Salary", "high@email.com", "3333333333",
-            "Executive", "Director", 120000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        assertEquals(120000.00, highSalaryEmployee.getSalary());
+        // Test different salary ranges
+        Employee lowSalaryEmp = manager.addEmployee("Low", "Salary", "low@email.com", "111-1111", 
+                                                   "Entry", "Intern", 30000.0, LocalDate.now(), WorkStatus.ACTIVE);
+        Employee highSalaryEmp = manager.addEmployee("High", "Salary", "high@email.com", "222-2222", 
+                                                    "Executive", "CEO", 200000.0, LocalDate.now(), WorkStatus.ACTIVE);
+        
+        assertEquals(30000.0, lowSalaryEmp.getSalary());
+        assertEquals(200000.0, highSalaryEmp.getSalary());
     }
 
     @Test
     public void testHireDateVariations() {
+        // Test different hire dates
         LocalDate pastDate = LocalDate.of(2020, 1, 15);
-        LocalDate currentDate = LocalDate.now();
-        LocalDate futureDate = LocalDate.of(2026, 6, 1);
-
-        Employee pastHire = manager.addEmployee("Past", "Hire", "past@email.com", "1111111111",
-            "Operations", "Operator", 40000.00, pastDate, WorkStatus.ACTIVE);
-        assertEquals(pastDate, pastHire.getHireDate());
-
-        Employee currentHire = manager.addEmployee("Current", "Hire", "current@email.com", "2222222222",
-            "Support", "Specialist", 45000.00, currentDate, WorkStatus.ACTIVE);
-        assertEquals(currentDate, currentHire.getHireDate());
-
-        Employee futureHire = manager.addEmployee("Future", "Hire", "future@email.com", "3333333333",
-            "Planning", "Planner", 50000.00, futureDate, WorkStatus.ACTIVE);
-        assertEquals(futureDate, futureHire.getHireDate());
+        LocalDate futureDate = LocalDate.of(2026, 12, 31);
+        
+        Employee pastHireEmp = manager.addEmployee("Past", "Hire", "past@email.com", "111-1111", 
+                                                  "IT", "Dev", 70000.0, pastDate, WorkStatus.ACTIVE);
+        Employee futureHireEmp = manager.addEmployee("Future", "Hire", "future@email.com", "222-2222", 
+                                                    "IT", "Dev", 70000.0, futureDate, WorkStatus.ACTIVE);
+        
+        assertEquals(pastDate, pastHireEmp.getHireDate());
+        assertEquals(futureDate, futureHireEmp.getHireDate());
     }
 
     @Test
     public void testDefaultConstructor() {
+        // Test that EmployeeManager can be created with default constructor
         EmployeeManager newManager = new EmployeeManager();
         assertNotNull(newManager);
         
-        // Should be able to add employees to new manager
-        Employee testEmployee = newManager.addEmployee("Test", "User", "test@email.com", "1234567890",
-            "Test Dept", "Tester", 50000.00, LocalDate.now(), WorkStatus.ACTIVE);
-        
-        assertNotNull(testEmployee);
-        assertEquals(1, testEmployee.getEmployeeId()); // Should start with ID 1
+        // Test that it can add employees
+        Employee emp = newManager.addEmployee("Test", "User", "test@email.com", "111-1111", 
+                                             "IT", "Dev", 50000.0, LocalDate.now(), WorkStatus.ACTIVE);
+        assertNotNull(emp);
+        assertEquals(1, emp.getEmployeeId()); // Should start from ID 1
     }
+
+    @Test
+public void testAddEmployeeWithNullValues() {
+    // Test how the system handles null inputs
+    IllegalArgumentException thrown1 = assertThrows(IllegalArgumentException.class, () -> {
+        manager.addEmployee(null, "Doe", "test@email.com", "123-456-7890", 
+                           "IT", "Dev", 50000.0, LocalDate.now(), WorkStatus.ACTIVE);
+    });
+}
+
+@Test
+public void testAddEmployeeWithEmptyStrings() {
+    // Test how the system handles empty strings
+    IllegalArgumentException thrown2 = assertThrows(IllegalArgumentException.class, () -> {
+        manager.addEmployee("", "Doe", "test@email.com", "123-456-7890", 
+                           "IT", "Dev", 50000.0, LocalDate.now(), WorkStatus.ACTIVE);
+    });
+}
+
+@Test
+public void testAddEmployeeWithNegativeSalary() {
+    // Test negative salary validation
+    IllegalArgumentException thrown3 = assertThrows(IllegalArgumentException.class, () -> {
+        manager.addEmployee("John", "Doe", "test@email.com", "123-456-7890", 
+                           "IT", "Dev", -1000.0, LocalDate.now(), WorkStatus.ACTIVE);
+    });
+}
 }

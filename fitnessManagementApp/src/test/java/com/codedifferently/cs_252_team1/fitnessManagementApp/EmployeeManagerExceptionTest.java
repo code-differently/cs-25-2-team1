@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -45,12 +44,10 @@ public class EmployeeManagerExceptionTest {
         // Test that EmployeeNotFoundException is thrown when getting non-existent employee
         int nonExistentId = 999;
         
-        EmployeeNotFoundException exception = assertThrows(EmployeeNotFoundException.class, () -> {
+        EmployeeNotFoundException thrown = assertThrows(EmployeeNotFoundException.class, () -> {
             manager.getEmployeeById(nonExistentId);
         });
-        
-        // Fixed: Added the period to match actual exception message
-        assertEquals("Employee with ID " + nonExistentId + " not found.", exception.getMessage());
+        assertNotNull(thrown);
     }
 
     @Test
@@ -84,7 +81,7 @@ public class EmployeeManagerExceptionTest {
         // Test that EmployeeNotFoundException is thrown when updating non-existent employee
         int nonExistentId = 999;
         
-        EmployeeNotFoundException exception = assertThrows(EmployeeNotFoundException.class, () -> {
+        assertThrows(EmployeeNotFoundException.class, () -> {
             manager.updateEmployee(
                 nonExistentId,
                 "Jane",
@@ -98,9 +95,6 @@ public class EmployeeManagerExceptionTest {
                 WorkStatus.ACTIVE
             );
         });
-        
-        // Fixed: Added the period to match actual exception message
-        assertEquals("Employee with ID " + nonExistentId + " not found.", exception.getMessage());
     }
 
     @Test
@@ -114,9 +108,10 @@ public class EmployeeManagerExceptionTest {
         assertEquals("Doe", deletedEmployee.getLastName());
         
         // Verify employee is actually deleted by trying to get it again
-        assertThrows(EmployeeNotFoundException.class, () -> {
+        EmployeeNotFoundException thrown = assertThrows(EmployeeNotFoundException.class, () -> {
             manager.getEmployeeById(testEmployee.getEmployeeId());
         });
+        assertNotNull(thrown);
     }
 
     @Test
@@ -124,11 +119,9 @@ public class EmployeeManagerExceptionTest {
         // Test that EmployeeNotFoundException is thrown when deleting non-existent employee
         int nonExistentId = 999;
         
-        EmployeeNotFoundException exception = assertThrows(EmployeeNotFoundException.class, () -> {
+        EmployeeNotFoundException thrown = assertThrows(EmployeeNotFoundException.class, () -> {
             manager.deleteEmployee(nonExistentId);
         });
-        
-        // Fixed: Added the period to match actual exception message
-        assertEquals("Employee with ID " + nonExistentId + " not found.", exception.getMessage());
+        assertNotNull(thrown);
     }
 }

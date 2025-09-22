@@ -1,9 +1,16 @@
 package com.codedifferently.cs_252_team1.fitnessManagementApp;
 
 import java.time.LocalDate;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 
 public class MembershipManagementTest {
@@ -220,4 +227,248 @@ public class MembershipManagementTest {
         // Allow for slight timing differences
         assertTrue(membershipDate.isEqual(today) || membershipDate.isBefore(today.plusDays(1)));
     }
+
+    // Additional test methods to improve coverage
+
+    @Test
+    public void testUpdateMember() throws MemberNotFoundException {
+        Member member = membershipManagement.addMember("John", "Doe", "john@example.com", "555-1234",
+            MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.ACTIVE);
+        
+        Member updatedMember = membershipManagement.updateMember(member.getMemberId(), 
+            "Johnny", "Smith", "johnny@example.com", "555-5678", 
+            MembershipType.PREMIUM, PaymentOption.CREDIT_CARD, MembershipStatus.INACTIVE);
+        
+        assertNotNull(updatedMember);
+        assertEquals("Johnny", updatedMember.getFirstName());
+        assertEquals("Smith", updatedMember.getLastName());
+        assertEquals("johnny@example.com", updatedMember.getEmail());
+        assertEquals("555-5678", updatedMember.getPhoneNumber());
+        assertEquals(MembershipType.PREMIUM, updatedMember.getMembershipType());
+        assertEquals(PaymentOption.CREDIT_CARD, updatedMember.getPaymentOption());
+        assertEquals(MembershipStatus.INACTIVE, updatedMember.getMembershipStatus());
     }
+
+    @Test
+    public void testUpdateMemberNotFound() {
+        assertThrows(MemberNotFoundException.class, () -> {
+            membershipManagement.updateMember(999, "John", "Doe", "john@example.com", "555-1234",
+                MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.ACTIVE);
+        });
+    }
+
+    @Test
+    public void testRemoveMember() throws MemberNotFoundException {
+        Member member = membershipManagement.addMember("John", "Doe", "john@example.com");
+        int memberId = member.getMemberId();
+        
+        Member removedMember = membershipManagement.removeMember(memberId);
+        
+        assertNotNull(removedMember);
+        assertEquals("John", removedMember.getFirstName());
+        assertEquals("Doe", removedMember.getLastName());
+        
+        // Verify member is actually removed
+        assertThrows(MemberNotFoundException.class, () -> {
+            membershipManagement.findMemberById(memberId);
+        });
+    }
+
+    @Test
+    public void testRemoveMemberNotFound() {
+        assertThrows(MemberNotFoundException.class, () -> {
+            membershipManagement.removeMember(999);
+        });
+    }
+
+    @Test
+    public void testFindMembersByName() {
+        membershipManagement.addMember("John", "Doe", "john@example.com");
+        membershipManagement.addMember("Jane", "Doe", "jane@example.com");
+        membershipManagement.addMember("Bob", "Smith", "bob@example.com");
+        
+        // Test finding by first name
+        assertEquals(1, membershipManagement.findMembersByName("John").size());
+        assertEquals(1, membershipManagement.findMembersByName("Jane").size());
+        assertEquals(1, membershipManagement.findMembersByName("Bob").size());
+        
+        // Test finding by last name
+        assertEquals(2, membershipManagement.findMembersByName("Doe").size());
+        assertEquals(1, membershipManagement.findMembersByName("Smith").size());
+        
+        // Test case insensitive search
+        assertEquals(1, membershipManagement.findMembersByName("john").size());
+        assertEquals(2, membershipManagement.findMembersByName("doe").size());
+        
+        // Test non-existent name
+        assertEquals(0, membershipManagement.findMembersByName("NonExistent").size());
+    }
+
+    @Test
+    public void testGetAllMembers() {
+        assertTrue(membershipManagement.getAllMembers().isEmpty());
+        
+        membershipManagement.addMember("John", "Doe", "john@example.com");
+        membershipManagement.addMember("Jane", "Smith", "jane@example.com");
+        
+        assertEquals(2, membershipManagement.getAllMembers().size());
+    }
+
+    @Test
+    public void testGetActiveMembers() {
+        membershipManagement.addMember("John", "Doe", "john@example.com", "555-1234",
+            MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.ACTIVE);
+        membershipManagement.addMember("Jane", "Smith", "jane@example.com", "555-5678",
+            MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.INACTIVE);
+        membershipManagement.addMember("Bob", "Johnson", "bob@example.com", "555-9876",
+            MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.ACTIVE);
+        
+        assertEquals(2, membershipManagement.getActiveMembers().size());
+    }
+
+    @Test
+    public void testGetInactiveMembers() {
+        membershipManagement.addMember("John", "Doe", "john@example.com", "555-1234",
+            MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.ACTIVE);
+        membershipManagement.addMember("Jane", "Smith", "jane@example.com", "555-5678",
+            MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.INACTIVE);
+        membershipManagement.addMember("Bob", "Johnson", "bob@example.com", "555-9876",
+            MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.EXPIRED);
+        
+        // getInactiveMembers() only returns INACTIVE status, not EXPIRED
+        assertEquals(1, membershipManagement.getInactiveMembers().size());
+    }
+
+    @Test
+    public void testActivateMember() throws MemberNotFoundException {
+        Member member = membershipManagement.addMember("John", "Doe", "john@example.com", "555-1234",
+            MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.INACTIVE);
+        
+        Member activatedMember = membershipManagement.activateMember(member.getMemberId());
+        
+        assertNotNull(activatedMember);
+        assertEquals(MembershipStatus.ACTIVE, activatedMember.getMembershipStatus());
+    }
+
+    @Test
+    public void testActivateMemberNotFound() {
+        assertThrows(MemberNotFoundException.class, () -> {
+            membershipManagement.activateMember(999);
+        });
+    }
+
+    @Test
+    public void testDeactivateMember() throws MemberNotFoundException {
+        Member member = membershipManagement.addMember("John", "Doe", "john@example.com", "555-1234",
+            MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.ACTIVE);
+        
+        Member deactivatedMember = membershipManagement.deactivateMember(member.getMemberId());
+        
+        assertNotNull(deactivatedMember);
+        assertEquals(MembershipStatus.INACTIVE, deactivatedMember.getMembershipStatus());
+    }
+
+    @Test
+    public void testDeactivateMemberNotFound() {
+        assertThrows(MemberNotFoundException.class, () -> {
+            membershipManagement.deactivateMember(999);
+        });
+    }
+
+    @Test
+    public void testIsEmpty() {
+        assertTrue(membershipManagement.isEmpty());
+        
+        membershipManagement.addMember("John", "Doe", "john@example.com");
+        assertFalse(membershipManagement.isEmpty());
+    }
+
+    @Test
+    public void testClearAllMembers() {
+        membershipManagement.addMember("John", "Doe", "john@example.com");
+        membershipManagement.addMember("Jane", "Smith", "jane@example.com");
+        
+        assertEquals(2, membershipManagement.getTotalMemberCount());
+        
+        membershipManagement.clearAllMembers();
+        
+        assertEquals(0, membershipManagement.getTotalMemberCount());
+        assertTrue(membershipManagement.isEmpty());
+    }
+
+    @Test
+    public void testGetMembersWithOverduePayments() {
+        Member member1 = membershipManagement.addMember("John", "Doe", "john@example.com");
+        Member member2 = membershipManagement.addMember("Jane", "Smith", "jane@example.com");
+        
+        // Initially no overdue payments
+        assertEquals(0, membershipManagement.getMembersWithOverduePayments().size());
+        
+        // Mark one member as overdue
+        try {
+            membershipManagement.markMemberPaymentOverdue(member1.getMemberId());
+            assertEquals(1, membershipManagement.getMembersWithOverduePayments().size());
+        } catch (MemberNotFoundException e) {
+            fail("Member should exist");
+        }
+    }
+
+    @Test
+    public void testRecordMemberPayment() throws MemberNotFoundException {
+        Member member = membershipManagement.addMember("John", "Doe", "john@example.com");
+        
+        Member updatedMember = membershipManagement.recordMemberPayment(member.getMemberId());
+        
+        assertNotNull(updatedMember);
+        assertEquals(PaymentStatus.UP_TO_DATE, updatedMember.getPaymentStatus());
+        assertEquals(LocalDate.now(), updatedMember.getLastPaymentDate());
+    }
+
+    @Test
+    public void testRecordMemberPaymentNotFound() {
+        assertThrows(MemberNotFoundException.class, () -> {
+            membershipManagement.recordMemberPayment(999);
+        });
+    }
+
+    @Test
+    public void testMarkMemberPaymentOverdue() throws MemberNotFoundException {
+        Member member = membershipManagement.addMember("John", "Doe", "john@example.com");
+        
+        Member updatedMember = membershipManagement.markMemberPaymentOverdue(member.getMemberId());
+        
+        assertNotNull(updatedMember);
+        assertEquals(PaymentStatus.OVERDUE, updatedMember.getPaymentStatus());
+    }
+
+    @Test
+    public void testMarkMemberPaymentOverdueNotFound() {
+        assertThrows(MemberNotFoundException.class, () -> {
+            membershipManagement.markMemberPaymentOverdue(999);
+        });
+    }
+
+    @Test
+    public void testAddMemberWithInvalidData() {
+        // Test null/empty validation
+        assertThrows(IllegalArgumentException.class, () -> {
+            membershipManagement.addMember(null, "Doe", "john@example.com", "555-1234",
+                MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.ACTIVE);
+        });
+        
+        assertThrows(IllegalArgumentException.class, () -> {
+            membershipManagement.addMember("", "Doe", "john@example.com", "555-1234",
+                MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.ACTIVE);
+        });
+        
+        assertThrows(IllegalArgumentException.class, () -> {
+            membershipManagement.addMember("John", null, "john@example.com", "555-1234",
+                MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.ACTIVE);
+        });
+        
+        assertThrows(IllegalArgumentException.class, () -> {
+            membershipManagement.addMember("John", "", "john@example.com", "555-1234",
+                MembershipType.BASIC, PaymentOption.CASH, MembershipStatus.ACTIVE);
+        });
+    }
+}

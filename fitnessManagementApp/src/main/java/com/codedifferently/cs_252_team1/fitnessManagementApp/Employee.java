@@ -1,10 +1,13 @@
 package com.codedifferently.cs_252_team1.fitnessManagementApp;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
-public class Employee {
+public class Employee implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     // Private fields with proper encapsulation
     private int employeeId;
     private String firstName;

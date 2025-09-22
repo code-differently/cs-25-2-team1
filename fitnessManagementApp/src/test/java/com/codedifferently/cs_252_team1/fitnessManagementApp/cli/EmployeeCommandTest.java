@@ -1,16 +1,5 @@
 package com.codedifferently.cs_252_team1.fitnessManagementApp.cli;
 
-import com.codedifferently.cs_252_team1.fitnessManagementApp.Employee;
-import com.codedifferently.cs_252_team1.fitnessManagementApp.EmployeeManager;
-import com.codedifferently.cs_252_team1.fitnessManagementApp.EmployeeNotFoundException;
-import com.codedifferently.cs_252_team1.fitnessManagementApp.WorkStatus;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.time.LocalDate;
@@ -18,9 +7,24 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.codedifferently.cs_252_team1.fitnessManagementApp.Employee;
+import com.codedifferently.cs_252_team1.fitnessManagementApp.EmployeeManager;
+import com.codedifferently.cs_252_team1.fitnessManagementApp.EmployeeNotFoundException;
+import com.codedifferently.cs_252_team1.fitnessManagementApp.WorkStatus;
 
 @ExtendWith(MockitoExtension.class)
 public class EmployeeCommandTest {
@@ -80,8 +84,8 @@ public void testAddEmployeeCommandSuccess() {
     addCommand.run();
 
     // Assert
-    verify(employeeManager).addEmployee("John", "Doe", "john@email.com", "1234567890",
-        "IT", "Developer", 60000.00, any(LocalDate.class), WorkStatus.ACTIVE);
+    verify(employeeManager).addEmployee(eq("John"), eq("Doe"), eq("john@email.com"),eq( "1234567890"),
+        eq("IT"),eq("Developer"), eq(60000.00), any(LocalDate.class), eq(WorkStatus.ACTIVE));
     assertTrue(outContent.toString().contains("✅ Employee 'John Doe' added successfully"));
 }
 
