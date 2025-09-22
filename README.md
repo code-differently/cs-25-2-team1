@@ -37,8 +37,7 @@
   - View a list of all members.  
   - Members are clearly categorized as **active** or **expired**.  
   - The list supports:  
-    - Sorting by member name, membership type, and status.  
-    - Filtering by status (active/expired).  
+    - Sorting by member name, membership type, and status.    
     - Searching by member name or ID.  
 
 ---
@@ -54,12 +53,4 @@
   
 
 ---
-
-### 4. Payment Tracking
-**As an owner of a gym**, I want to track if members are up to date on payments or not.  
-
-💡 **Acceptance Criteria:**  
-- System displays each member’s payment status as:  
-  - Up to date  
-  - Overdue  
 
