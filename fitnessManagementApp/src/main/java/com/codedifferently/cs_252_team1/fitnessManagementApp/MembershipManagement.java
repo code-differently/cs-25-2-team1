@@ -1,5 +1,10 @@
 package com.codedifferently.cs_252_team1.fitnessManagementApp;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 /**
  * MembershipManagement class provides functionality for administrators to 
@@ -20,10 +28,52 @@ import org.springframework.stereotype.Service;
 public class MembershipManagement {
     private Map<Integer, Member> members;
     private int nextMemberId;
+    private static final String DATA_FILE = "fitness_members.dat";
     
     public MembershipManagement() {
         this.members = new HashMap<>();
         this.nextMemberId = 1;
+    }
+    
+    @PostConstruct
+    private void loadData() {
+        try {
+            File file = new File(DATA_FILE);
+            if (file.exists()) {
+                try (FileInputStream fis = new FileInputStream(file);
+                     ObjectInputStream ois = new ObjectInputStream(fis)) {
+                    @SuppressWarnings("unchecked")
+                    Map<Integer, Member> loadedMembers = (Map<Integer, Member>) ois.readObject();
+                    this.members = loadedMembers;
+                    
+                    // Update nextMemberId to be higher than any existing ID
+                    this.nextMemberId = members.keySet().stream()
+                        .mapToInt(Integer::intValue)
+                        .max()
+                        .orElse(0) + 1;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Warning: Could not load member data: " + e.getMessage());
+            this.members = new HashMap<>();
+            this.nextMemberId = 1;
+        }
+    }
+    
+    @PreDestroy
+    private void saveData() {
+        try {
+            try (FileOutputStream fos = new FileOutputStream(DATA_FILE);
+                 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+                oos.writeObject(members);
+            }
+        } catch (Exception e) {
+            System.err.println("Warning: Could not save member data: " + e.getMessage());
+        }
+    }
+    
+    private void persistData() {
+        saveData(); // Save immediately after any modification
     }
     
     /**
@@ -69,6 +119,9 @@ public class MembershipManagement {
         
         // Add to members collection
         members.put(newMember.getMemberId(), newMember);
+        
+        // Persist data immediately
+        persistData();
         
         return newMember;
     }
@@ -252,6 +305,23 @@ public class MembershipManagement {
         member.activate();
         return member;
     }
+
+    /**
+ * Deletes a member by their ID
+ * @param memberId The ID of the member to delete
+ * @return The deleted member
+ * @throws MemberNotFoundException if the member with the given ID is not found
+ */
+public Member deleteMember(int memberId) throws MemberNotFoundException {
+    Member memberToDelete = members.get(memberId);
+    if (memberToDelete == null) {
+        throw new MemberNotFoundException(memberId);
+    }
+    
+    members.remove(memberId);
+    return memberToDelete;
+}
+
     
     /**
      * Deactivate a member's membership
@@ -267,7 +337,11 @@ public class MembershipManagement {
         member.deactivate();
         return member;
     }
-    
+
+   
+    public java.util.List<Member> listAllMembers() {
+        return new java.util.ArrayList<>(members.values());
+    }
     /**
      * Check if the system contains any members
      * @return True if there are no members, false otherwise
