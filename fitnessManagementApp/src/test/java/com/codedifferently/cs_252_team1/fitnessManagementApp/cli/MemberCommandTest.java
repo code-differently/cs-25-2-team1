@@ -1,5 +1,13 @@
 package com.codedifferently.cs_252_team1.fitnessManagementApp.cli;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -7,17 +15,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.Mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.codedifferently.cs_252_team1.fitnessManagementApp.Member;
@@ -53,7 +54,7 @@ public class MemberCommandTest {
         MemberCommand command = new MemberCommand();
         command.run();
         
-        assertTrue(outContent.toString().contains("Use a subcommand: add, remove, list, get"));
+        assertTrue(outContent.toString().contains("Use a subcommand: add, update, remove, list, get"));
     }
 
     @Test

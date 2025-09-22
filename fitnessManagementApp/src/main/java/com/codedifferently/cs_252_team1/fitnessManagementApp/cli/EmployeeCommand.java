@@ -1,20 +1,24 @@
 package com.codedifferently.cs_252_team1.fitnessManagementApp.cli;
 
-import com.codedifferently.cs_252_team1.fitnessManagementApp.EmployeeManager;
-import com.codedifferently.cs_252_team1.fitnessManagementApp.Employee;
-import com.codedifferently.cs_252_team1.fitnessManagementApp.WorkStatus;
-import com.codedifferently.cs_252_team1.fitnessManagementApp.EmployeeNotFoundException;
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.codedifferently.cs_252_team1.fitnessManagementApp.Employee;
+import com.codedifferently.cs_252_team1.fitnessManagementApp.EmployeeManager;
+import com.codedifferently.cs_252_team1.fitnessManagementApp.EmployeeNotFoundException;
+import com.codedifferently.cs_252_team1.fitnessManagementApp.WorkStatus;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-import java.time.LocalDate;
 
 @Component
 @Command(name = "employee", description = "Manage gym employees",
          subcommands = {
              EmployeeCommand.AddEmployeeCommand.class,
+             EmployeeCommand.UpdateEmployeeCommand.class,
              EmployeeCommand.RemoveEmployeeCommand.class,
              EmployeeCommand.ListEmployeesCommand.class,
              EmployeeCommand.GetEmployeeCommand.class
@@ -23,7 +27,7 @@ public class EmployeeCommand implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Use a subcommand: add, remove, list, get");
+        System.out.println("Use a subcommand: add, update, remove, list, get");
     }
 
     @Component
@@ -73,6 +77,78 @@ public class EmployeeCommand implements Runnable {
                 System.out.printf("✅ Employee '%s %s' added successfully with ID: %d%n", firstName, lastName, employee.getEmployeeId());
             } catch (Exception e) {
                 System.err.printf("❌ Error adding employee: %s%n", e.getMessage());
+            }
+        }
+    }
+
+    @Component
+    @Command(name = "update", description = "Update an existing employee")
+    public static class UpdateEmployeeCommand implements Runnable {
+        
+        @Autowired
+        private EmployeeManager employeeManager;
+
+        @Parameters(index = "0", description = "Employee ID to update")
+        public int employeeId;
+
+        @Option(names = {"-f", "--firstname"}, description = "Employee first name")
+        public String firstName;
+
+        @Option(names = {"-l", "--lastname"}, description = "Employee last name")
+        public String lastName;
+
+        @Option(names = {"-e", "--email"}, description = "Employee email")
+        public String email;
+
+        @Option(names = {"-p", "--phone"}, description = "Employee phone")
+        public String phone;
+
+        @Option(names = {"-d", "--department"}, description = "Department")
+        public String department;
+
+        @Option(names = {"-pos", "--position"}, description = "Job position")
+        public String position;
+
+        @Option(names = {"-s", "--salary"}, description = "Salary")
+        public Double salary;
+
+        @Option(names = {"-st", "--status"}, description = "Work status (ACTIVE, INACTIVE, ON_LEAVE)")
+        public WorkStatus workStatus;
+
+        public void setEmployeeManager(EmployeeManager employeeManager) {
+            this.employeeManager = employeeManager;
+        }
+
+        @Override
+        public void run() {
+            try {
+                // Get current employee to preserve unchanged fields
+                Employee currentEmployee = employeeManager.getEmployeeById(employeeId);
+                
+                // Use current values if new ones aren't provided
+                String updateFirstName = firstName != null ? firstName : currentEmployee.getFirstName();
+                String updateLastName = lastName != null ? lastName : currentEmployee.getLastName();
+                String updateEmail = email != null ? email : currentEmployee.getEmail();
+                String updatePhone = phone != null ? phone : currentEmployee.getPhoneNumber();
+                String updateDepartment = department != null ? department : currentEmployee.getDepartment();
+                String updatePosition = position != null ? position : currentEmployee.getPosition();
+                double updateSalary = salary != null ? salary : currentEmployee.getSalary();
+                WorkStatus updateWorkStatus = workStatus != null ? workStatus : currentEmployee.getWorkStatus();
+                
+                Employee updatedEmployee = employeeManager.updateEmployee(employeeId, updateFirstName, updateLastName, 
+                                                                         updateEmail, updatePhone, updateDepartment, 
+                                                                         updatePosition, updateSalary, 
+                                                                         currentEmployee.getHireDate(), updateWorkStatus);
+                
+                System.out.printf("✅ Employee '%s %s' (ID: %d) updated successfully%n", 
+                    updatedEmployee.getFirstName(), updatedEmployee.getLastName(), employeeId);
+                System.out.printf("📝 Updated details: Email: %s | Department: %s | Position: %s | Salary: $%.2f | Status: %s%n", 
+                    updatedEmployee.getEmail(), updatedEmployee.getDepartment(), updatedEmployee.getPosition(), 
+                    updatedEmployee.getSalary(), updatedEmployee.getWorkStatus());
+            } catch (EmployeeNotFoundException e) {
+                System.err.printf("❌ Employee not found: %s%n", e.getMessage());
+            } catch (Exception e) {
+                System.err.printf("❌ Error updating employee: %s%n", e.getMessage());
             }
         }
     }
