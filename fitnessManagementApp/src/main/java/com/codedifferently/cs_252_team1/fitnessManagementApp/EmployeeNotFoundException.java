@@ -11,7 +11,7 @@ public class EmployeeNotFoundException extends Exception {
      * 
      * @param employeeId the ID of the employee that was not found
      */
-    public EmployeeNotFoundException(int employeeId) {
+    public EmployeeNotFoundException(String employeeId) {
         super("Employee with ID " + employeeId + " not found");
     }
     

@@ -34,28 +34,36 @@ public class EmployeeCommand implements Runnable {
         private EmployeeManager employeeManager;
 
         @Option(names = {"-f", "--firstname"}, required = true, description = "Employee first name")
-        private String firstName;
+        public String firstName;
 
         @Option(names = {"-l", "--lastname"}, required = true, description = "Employee last name")
-        private String lastName;
+        public String lastName;
 
         @Option(names = {"-e", "--email"}, required = true, description = "Employee email")
-        private String email;
+        public String email;
 
         @Option(names = {"-p", "--phone"}, required = true, description = "Employee phone")
-        private String phone;
+        public String phone;
 
         @Option(names = {"-d", "--department"}, required = true, description = "Employee department")
-        private String department;
+        public String department;
 
         @Option(names = {"-pos", "--position"}, required = true, description = "Employee position")
-        private String position;
+        public String position;
 
         @Option(names = {"-sal", "--salary"}, required = true, description = "Employee salary")
-        private double salary;
+        public double salary;
 
         @Option(names = {"-s", "--status"}, description = "Work status (ACTIVE, INACTIVE, TERMINATED, ON_LEAVE)")
-        private WorkStatus workStatus = WorkStatus.ACTIVE;
+        public WorkStatus workStatus = WorkStatus.ACTIVE;
+
+        public void setEmployeeManager(EmployeeManager employeeManager) {
+            this.employeeManager = employeeManager;
+        }
+        
+        public void setWorkStatus(WorkStatus workStatus) {
+            this.workStatus = workStatus;
+        }
 
         @Override
         public void run() {
@@ -74,10 +82,14 @@ public class EmployeeCommand implements Runnable {
     public static class RemoveEmployeeCommand implements Runnable {
         
         @Autowired
-        private EmployeeManager employeeManager;
+        public EmployeeManager employeeManager;
 
         @Parameters(index = "0", description = "Employee ID to remove")
-        private int employeeId;
+        public int employeeId;
+
+        public void setEmployeeManager(EmployeeManager employeeManager) {
+            this.employeeManager = employeeManager;
+        }
 
         @Override
         public void run() {
@@ -98,7 +110,11 @@ public class EmployeeCommand implements Runnable {
     public static class ListEmployeesCommand implements Runnable {
         
         @Autowired
-        private EmployeeManager employeeManager;
+        public EmployeeManager employeeManager;
+
+        public void setEmployeeManager(EmployeeManager employeeManager) {
+            this.employeeManager = employeeManager;
+        }
 
         @Override
         public void run() {
@@ -126,10 +142,14 @@ public class EmployeeCommand implements Runnable {
     public static class GetEmployeeCommand implements Runnable {
         
         @Autowired
-        private EmployeeManager employeeManager;
+        public EmployeeManager employeeManager;
 
         @Parameters(index = "0", description = "Employee ID")
-        private int employeeId;
+        public int employeeId;
+
+        public void setEmployeeManager(EmployeeManager employeeManager) {
+            this.employeeManager = employeeManager;
+        }
 
         @Override
         public void run() {

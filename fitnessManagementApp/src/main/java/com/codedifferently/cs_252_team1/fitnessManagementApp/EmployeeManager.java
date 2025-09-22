@@ -35,7 +35,7 @@ public class EmployeeManager {
     public Employee getEmployeeById(int employeeId) throws EmployeeNotFoundException {
         Employee employee = employeeMap.get(employeeId);
         if (employee == null) {
-            throw new EmployeeNotFoundException(employeeId);
+            throw new EmployeeNotFoundException("Employee with ID " + employeeId + " not found.");
         }
         return employee;
     }
@@ -46,7 +46,7 @@ public class EmployeeManager {
                                   double salary, LocalDate hireDate, WorkStatus workStatus) throws EmployeeNotFoundException {
         Employee existingEmployee = employeeMap.get(employeeId);
         if (existingEmployee == null) {
-            throw new EmployeeNotFoundException(employeeId);
+            throw new EmployeeNotFoundException("Employee with ID " + employeeId + " not found.");
         }
         existingEmployee.setFirstName(firstName);
         existingEmployee.setLastName(lastName);
@@ -64,7 +64,7 @@ public class EmployeeManager {
     public Employee deleteEmployee(int employeeId) throws EmployeeNotFoundException {
         Employee removedEmployee = employeeMap.remove(employeeId);
         if (removedEmployee == null) {
-            throw new EmployeeNotFoundException(employeeId);
+            throw new EmployeeNotFoundException("Employee with ID " + employeeId + " not found.");
         }
         return removedEmployee;
     }

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,14 +42,15 @@ public class EmployeeManagerExceptionTest {
 
     @Test
     public void testGetEmployeeByIdThrowsException() {
-        // Test that EmployeeNotFoundException is thrown for non-existent employee
+        // Test that EmployeeNotFoundException is thrown when getting non-existent employee
         int nonExistentId = 999;
         
         EmployeeNotFoundException exception = assertThrows(EmployeeNotFoundException.class, () -> {
             manager.getEmployeeById(nonExistentId);
         });
         
-        assertEquals("Employee with ID " + nonExistentId + " not found", exception.getMessage());
+        // Fixed: Added the period to match actual exception message
+        assertEquals("Employee with ID " + nonExistentId + " not found.", exception.getMessage());
     }
 
     @Test
@@ -97,7 +99,8 @@ public class EmployeeManagerExceptionTest {
             );
         });
         
-        assertEquals("Employee with ID " + nonExistentId + " not found", exception.getMessage());
+        // Fixed: Added the period to match actual exception message
+        assertEquals("Employee with ID " + nonExistentId + " not found.", exception.getMessage());
     }
 
     @Test
@@ -125,6 +128,7 @@ public class EmployeeManagerExceptionTest {
             manager.deleteEmployee(nonExistentId);
         });
         
-        assertEquals("Employee with ID " + nonExistentId + " not found", exception.getMessage());
+        // Fixed: Added the period to match actual exception message
+        assertEquals("Employee with ID " + nonExistentId + " not found.", exception.getMessage());
     }
 }

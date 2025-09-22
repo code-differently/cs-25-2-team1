@@ -252,6 +252,23 @@ public class MembershipManagement {
         member.activate();
         return member;
     }
+
+    /**
+ * Deletes a member by their ID
+ * @param memberId The ID of the member to delete
+ * @return The deleted member
+ * @throws MemberNotFoundException if the member with the given ID is not found
+ */
+public Member deleteMember(int memberId) throws MemberNotFoundException {
+    Member memberToDelete = members.get(memberId);
+    if (memberToDelete == null) {
+        throw new MemberNotFoundException(memberId);
+    }
+    
+    members.remove(memberId);
+    return memberToDelete;
+}
+
     
     /**
      * Deactivate a member's membership
@@ -267,7 +284,11 @@ public class MembershipManagement {
         member.deactivate();
         return member;
     }
-    
+
+   
+    public java.util.List<Member> listAllMembers() {
+        return new java.util.ArrayList<>();
+    }
     /**
      * Check if the system contains any members
      * @return True if there are no members, false otherwise
