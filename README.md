@@ -49,8 +49,6 @@
 - Member profiles display current payment option (e.g., Cash, Credit Card, Bank Transfer).  
 - Admin can update the member’s payment option when editing their profile.  
 - Payment option is visible in:  
-  - Member profile view  
-  
+  - Member profile view   
 
----
 
