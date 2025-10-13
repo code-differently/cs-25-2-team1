@@ -1,3 +1,4 @@
 export default function HomePage() {
-  return <h1>Hello Habit Tracker 👋</h1>
+  return <h1 className="text-white">Hello Habit Tracker 👋</h1>
+
 }
