@@ -3,7 +3,17 @@
 --- 
 ### **User Story 1**
 
-**As a user,** I want to edit my profile (name, avatar, email).
+**As a user,** I want to sign up, sign in, and sign out securely so that my habits and progress are saved.
+
+**Acceptance Criteria:**
+* Validates user credentials
+* Persists user sessions
+
+---
+
+### **User Story 2**
+
+**As a user,** I want to edit my profile (name, avatar, email) so I can personalize my dashboard.
 
 **Acceptance Criteria:**
 * Allows updating profile fields
@@ -30,7 +40,15 @@
 **Acceptance Criteria:**
 * Completion updates displayed instantly in UI
 * Streak counter increments correctly
-* Updates reflect so users keep current data
+* Updates persisted in backend
+
+---
+
+### **User Story 5**
+
+**As a user,** I want to edit or delete habits so I can keep my list up to date.
+
+**Acceptance Criteria:**
 * Edit modal allows updating habit details
 * Deleting shows a confirmation prompt
 * Habit list refreshes automatically
@@ -42,7 +60,7 @@
 **As a user,** I want to see my streak count and completion history per habit so I can stay motivated.
 
 **Acceptance Criteria:**
-* Displays streak counter that shows a fire emoji to represent streaks (🔥)
+* Displays streak counter (🔥)
 * Shows daily completion grid or mini calendar view
 * Fetches streak data from backend
 
@@ -53,6 +71,7 @@
 **As a user,** I want to see an overview dashboard of my habit progress with charts so I can visualize consistency.
 
 **Acceptance Criteria:**
+* Dashboard uses **Recharts** or **Chart.js**
 * Displays weekly or monthly completion stats
 * Responsive and accessible charts
 
@@ -74,7 +93,26 @@
 **As a user,** I want to see motivational messages or confetti animations when I hit streak milestones so it feels rewarding.
 
 **Acceptance Criteria:**
-* When users reach a significant milestone (e.g., completing a habit streak, finishing a goal, or maintaining consistency for a set number of days), the app should celebrate their achievement through visual animations or encouraging messages.
+* Trigger animations or messages upon milestones
+* Uses **framer-motion** for transitions or effects
+* Non-blocking and reusable animation component
+
+---
+
+### **User Story 10**
+
+**As a user,** I want to have a leaderboard showing top streaks among all users so I can compete socially.
+
+**Acceptance Criteria:**
+* Displays global leaderboard (username + streak)
+* Fetches and sorts data by streak count
+* Optional: toggle between global and friends view
+
+---
+
+## Epic 5: UI/UX Polish & Accessibility
+
+**Goal:** Make the app feel professional and easy to use.
 
 ---
 
@@ -83,7 +121,7 @@
 **As a user,** I want a clean dashboard with clear visual hierarchy and progress indicators so I can track habits at a glance.
 
 **Acceptance Criteria:**
-* Has consistent styling
+* Uses **Tailwind CSS** for consistent styling
 * Includes progress bars and visual cues
 
 ---
