@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS public.users (
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies before creating to avoid conflicts
 DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
 CREATE POLICY "Users can view own profile" ON public.users
   FOR SELECT USING (auth.uid() = id);
@@ -51,6 +52,7 @@ CREATE TABLE IF NOT EXISTS public.habits (
 
 ALTER TABLE public.habits ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies before creating to avoid conflicts
 DROP POLICY IF EXISTS "Users can view own habits" ON public.habits;
 CREATE POLICY "Users can view own habits" ON public.habits
   FOR SELECT USING (auth.uid() = user_id);
@@ -88,6 +90,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_habit_logs_unique_daily ON public.habit_lo
 
 ALTER TABLE public.habit_logs ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies before creating to avoid conflicts
 DROP POLICY IF EXISTS "Users can view own habit logs" ON public.habit_logs;
 CREATE POLICY "Users can view own habit logs" ON public.habit_logs
   FOR SELECT USING (auth.uid() = user_id);
@@ -110,6 +113,8 @@ CREATE POLICY "Users can delete own habit logs" ON public.habit_logs
 
 -- Habits indexes
 CREATE INDEX IF NOT EXISTS idx_habits_user_id ON public.habits(user_id);
+CREATE INDEX IF NOT EXISTS idx_habits_user_active ON public.habits(user_id, is_active) 
+  WHERE is_active = true;
 
 -- Habit logs indexes
 CREATE INDEX IF NOT EXISTS idx_habit_logs_user_id ON public.habit_logs(user_id);
@@ -157,7 +162,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Triggers for updated_at
+-- Drop existing triggers before creating to avoid conflicts
 DROP TRIGGER IF EXISTS set_updated_at_users ON public.users;
 CREATE TRIGGER set_updated_at_users
   BEFORE UPDATE ON public.users
@@ -211,19 +216,20 @@ CREATE OR REPLACE FUNCTION public.get_habit_completion_rate(
 RETURNS DECIMAL AS $$
 DECLARE
   v_frequency TEXT;
+  v_target_count INTEGER;
   v_expected_completions INTEGER;
   v_actual_completions INTEGER;
 BEGIN
-  -- Get habit frequency
-  SELECT frequency INTO v_frequency
+  -- Get habit frequency and target
+  SELECT frequency, target_count INTO v_frequency, v_target_count
   FROM public.habits
   WHERE id = p_habit_id;
   
-  -- Calculate expected completions based on frequency (assuming target_count = 1)
+  -- Calculate expected completions based on frequency
   v_expected_completions := CASE v_frequency
-    WHEN 'daily' THEN (p_end_date - p_start_date + 1)
-    WHEN 'weekly' THEN CEIL((p_end_date - p_start_date + 1) / 7.0)
-    WHEN 'monthly' THEN CEIL((p_end_date - p_start_date + 1) / 30.0)
+    WHEN 'daily' THEN (p_end_date - p_start_date + 1) * v_target_count
+    WHEN 'weekly' THEN CEIL((p_end_date - p_start_date + 1) / 7.0) * v_target_count
+    WHEN 'monthly' THEN CEIL((p_end_date - p_start_date + 1) / 30.0) * v_target_count
   END;
   
   -- Count actual completions
@@ -241,6 +247,37 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ===============================================
+-- VIEWS FOR ANALYTICS
+-- ===============================================
+
+-- Drop existing view before creating to avoid conflicts
+DROP VIEW IF EXISTS public.habit_stats;
+
+-- Comprehensive habit stats view with flexible date ranges
+CREATE OR REPLACE VIEW public.habit_stats AS
+SELECT 
+  h.id AS habit_id,
+  h.title,
+  h.user_id,
+  h.frequency,
+  h.target_count,
+  h.color,
+  h.is_active,
+  h.created_at,
+  COUNT(hl.id) AS total_completions,
+  MAX(hl.completed_at) AS last_completed_at,
+  COUNT(DISTINCT DATE(hl.completed_at)) AS unique_completion_days,
+  COUNT(CASE WHEN hl.completed_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 END) AS last_7_days,
+  COUNT(CASE WHEN hl.completed_at >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) AS last_30_days,
+  COUNT(CASE WHEN DATE(hl.completed_at) = CURRENT_DATE THEN 1 END) AS today_count
+FROM public.habits h
+LEFT JOIN public.habit_logs hl ON h.id = hl.habit_id
+GROUP BY h.id, h.title, h.user_id, h.frequency, h.target_count, h.color, h.is_active, h.created_at;
+
+-- Enable RLS on view (queries run with user privileges)
+ALTER VIEW public.habit_stats SET (security_invoker = true);
+
+-- ===============================================
 -- GRANT PERMISSIONS
 -- ===============================================
 
@@ -249,3 +286,4 @@ GRANT USAGE ON SCHEMA public TO authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated;
+GRANT SELECT ON public.habit_stats TO authenticated;
