@@ -20,12 +20,15 @@ CREATE TABLE IF NOT EXISTS public.users (
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
 CREATE POLICY "Users can view own profile" ON public.users
   FOR SELECT USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
 CREATE POLICY "Users can update own profile" ON public.users
   FOR UPDATE USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
 CREATE POLICY "Users can insert own profile" ON public.users
   FOR INSERT WITH CHECK (auth.uid() = id);
 
@@ -48,15 +51,19 @@ CREATE TABLE IF NOT EXISTS public.habits (
 
 ALTER TABLE public.habits ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own habits" ON public.habits;
 CREATE POLICY "Users can view own habits" ON public.habits
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own habits" ON public.habits;
 CREATE POLICY "Users can insert own habits" ON public.habits
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own habits" ON public.habits;
 CREATE POLICY "Users can update own habits" ON public.habits
   FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own habits" ON public.habits;
 CREATE POLICY "Users can delete own habits" ON public.habits
   FOR DELETE USING (auth.uid() = user_id);
 
@@ -70,29 +77,30 @@ CREATE TABLE IF NOT EXISTS public.habit_logs (
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
   completed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
   notes TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
-  -- Ensure habit belongs to user (data integrity)
-  CONSTRAINT habit_logs_user_habit_check 
-    CHECK (user_id = (SELECT user_id FROM public.habits WHERE id = habit_id))
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
 );
 
 -- Prevent duplicate completions on same day for same habit
-CREATE UNIQUE INDEX idx_habit_logs_unique_daily ON public.habit_logs(
+CREATE UNIQUE INDEX IF NOT EXISTS idx_habit_logs_unique_daily ON public.habit_logs(
   habit_id, 
   DATE(completed_at AT TIME ZONE 'UTC')
 );
 
 ALTER TABLE public.habit_logs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own habit logs" ON public.habit_logs;
 CREATE POLICY "Users can view own habit logs" ON public.habit_logs
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own habit logs" ON public.habit_logs;
 CREATE POLICY "Users can insert own habit logs" ON public.habit_logs
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own habit logs" ON public.habit_logs;
 CREATE POLICY "Users can update own habit logs" ON public.habit_logs
   FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own habit logs" ON public.habit_logs;
 CREATE POLICY "Users can delete own habit logs" ON public.habit_logs
   FOR DELETE USING (auth.uid() = user_id);
 
@@ -102,8 +110,6 @@ CREATE POLICY "Users can delete own habit logs" ON public.habit_logs
 
 -- Habits indexes
 CREATE INDEX IF NOT EXISTS idx_habits_user_id ON public.habits(user_id);
-CREATE INDEX IF NOT EXISTS idx_habits_user_active ON public.habits(user_id, is_active) 
-  WHERE is_active = true;
 
 -- Habit logs indexes
 CREATE INDEX IF NOT EXISTS idx_habit_logs_user_id ON public.habit_logs(user_id);
@@ -135,16 +141,41 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Data integrity function for habit_logs
+CREATE OR REPLACE FUNCTION public.validate_habit_ownership()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Ensure the habit belongs to the user
+  IF NOT EXISTS (
+    SELECT 1 FROM public.habits 
+    WHERE id = NEW.habit_id AND user_id = NEW.user_id
+  ) THEN
+    RAISE EXCEPTION 'Habit does not belong to the specified user';
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Triggers for updated_at
+DROP TRIGGER IF EXISTS set_updated_at_users ON public.users;
 CREATE TRIGGER set_updated_at_users
   BEFORE UPDATE ON public.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
 
+DROP TRIGGER IF EXISTS set_updated_at_habits ON public.habits;
 CREATE TRIGGER set_updated_at_habits
   BEFORE UPDATE ON public.habits
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
+
+-- Trigger for habit ownership validation
+DROP TRIGGER IF EXISTS validate_habit_logs_ownership ON public.habit_logs;
+CREATE TRIGGER validate_habit_logs_ownership
+  BEFORE INSERT OR UPDATE ON public.habit_logs
+  FOR EACH ROW
+  EXECUTE FUNCTION public.validate_habit_ownership();
 
 -- Auto-create user profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -161,6 +192,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
@@ -179,20 +211,19 @@ CREATE OR REPLACE FUNCTION public.get_habit_completion_rate(
 RETURNS DECIMAL AS $$
 DECLARE
   v_frequency TEXT;
-  v_target_count INTEGER;
   v_expected_completions INTEGER;
   v_actual_completions INTEGER;
 BEGIN
-  -- Get habit frequency and target
-  SELECT frequency, target_count INTO v_frequency, v_target_count
+  -- Get habit frequency
+  SELECT frequency INTO v_frequency
   FROM public.habits
   WHERE id = p_habit_id;
   
-  -- Calculate expected completions based on frequency
+  -- Calculate expected completions based on frequency (assuming target_count = 1)
   v_expected_completions := CASE v_frequency
-    WHEN 'daily' THEN (p_end_date - p_start_date + 1) * v_target_count
-    WHEN 'weekly' THEN CEIL((p_end_date - p_start_date + 1) / 7.0) * v_target_count
-    WHEN 'monthly' THEN CEIL((p_end_date - p_start_date + 1) / 30.0) * v_target_count
+    WHEN 'daily' THEN (p_end_date - p_start_date + 1)
+    WHEN 'weekly' THEN CEIL((p_end_date - p_start_date + 1) / 7.0)
+    WHEN 'monthly' THEN CEIL((p_end_date - p_start_date + 1) / 30.0)
   END;
   
   -- Count actual completions
@@ -208,33 +239,6 @@ BEGIN
   END;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- ===============================================
--- VIEWS FOR ANALYTICS
--- ===============================================
-
--- Improved habit stats view with flexible date ranges
-CREATE OR REPLACE VIEW public.habit_stats AS
-SELECT 
-  h.id AS habit_id,
-  h.title,
-  h.user_id,
-  h.frequency,
-  h.target_count,
-  h.color,
-  h.is_active,
-  COUNT(hl.id) AS total_completions,
-  MAX(hl.completed_at) AS last_completed_at,
-  COUNT(DISTINCT DATE(hl.completed_at)) AS unique_completion_days,
-  COUNT(CASE WHEN hl.completed_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 END) AS last_7_days,
-  COUNT(CASE WHEN hl.completed_at >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) AS last_30_days,
-  COUNT(CASE WHEN DATE(hl.completed_at) = CURRENT_DATE THEN 1 END) AS today_count
-FROM public.habits h
-LEFT JOIN public.habit_logs hl ON h.id = hl.habit_id
-GROUP BY h.id, h.title, h.user_id, h.frequency, h.target_count, h.color, h.is_active;
-
--- Enable RLS on view (queries run with user privileges)
-ALTER VIEW public.habit_stats SET (security_invoker = true);
 
 -- ===============================================
 -- GRANT PERMISSIONS
