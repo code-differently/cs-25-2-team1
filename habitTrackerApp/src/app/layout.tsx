@@ -26,11 +26,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <Navbar 
-          url="/"
-          title=""
-        />
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <div className="flex">
+          <Navbar 
+            url="/"
+            title=""
+          />
+          <main className="flex-1 ml-64">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   )
