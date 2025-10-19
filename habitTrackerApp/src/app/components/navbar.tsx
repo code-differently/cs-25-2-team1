@@ -9,7 +9,7 @@ export interface NavbarProps {
 
 export const Navbar: FC<NavbarProps> = ({ url, title }) => {
     return (
-        <nav className="bg-pink-800 p-6 text-white h-screen w-64 fixed left-0 top-0 flex flex-col items-center justify-start space-y-6">
+        <nav className="bg-indigo-700 p-6 text-white h-screen w-64 fixed left-0 top-0 flex flex-col items-center justify-start space-y-6">
             <div className="text-center mb-8">
                 <div className="font-bold text-lg">{url}</div>
                 <div className="text-sm">{title}</div>

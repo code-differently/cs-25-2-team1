@@ -7,45 +7,45 @@ const ProgressTracker = () => {
   const pending = 0;
 
   return (
-    <div className="flex flex-col items-center gap-6 p-8 bg-gray-200 rounded-3xl">
+    <div className="flex flex-col items-center gap-4 sm:gap-6 p-6 sm:p-8 bg-gray-200 rounded-3xl w-full lg:w-auto">
       {/* Title */}
-      <h2 className="text-xl font-semibold text-black">Progress Tracker</h2>
+      <h2 className="text-lg sm:text-xl font-semibold text-black">Progress Tracker</h2>
       
       {/* Circular Progress */}
-      <div className="relative w-48 h-48">
+      <div className="relative w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48">
         {/* Background Circle */}
-        <svg className="w-full h-full transform -rotate-90">
+        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
           <circle
-            cx="96"
-            cy="96"
-            r="80"
+            cx="50"
+            cy="50"
+            r="35"
             stroke="#e5e7eb"
-            strokeWidth="16"
+            strokeWidth="8"
             fill="none"
           />
           {/* Progress Circle */}
           <circle
-            cx="96"
-            cy="96"
-            r="80"
+            cx="50"
+            cy="50"
+            r="35"
             stroke="#4338ca"
-            strokeWidth="16"
+            strokeWidth="8"
             fill="none"
-            strokeDasharray={`${2 * Math.PI * 80}`}
-            strokeDashoffset={`${2 * Math.PI * 80 * (1 - percentage / 100)}`}
+            strokeDasharray={`${2 * Math.PI * 35}`}
+            strokeDashoffset={`${2 * Math.PI * 35 * (1 - percentage / 100)}`}
             strokeLinecap="round"
           />
         </svg>
         
         {/* Center Text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-5xl font-bold text-black">{percentage}%</span>
-          <span className="text-lg text-black">Completed</span>
+          <span className="text-2xl sm:text-3xl lg:text-5xl font-bold text-black">{percentage}%</span>
+          <span className="text-sm sm:text-base lg:text-lg text-black">Completed</span>
         </div>
       </div>
       
       {/* Legend */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4 sm:gap-6">
         {/* Completed */}
         <div className="flex flex-col items-center gap-1">
           <div className="w-3 h-3 rounded-full bg-indigo-700" />
