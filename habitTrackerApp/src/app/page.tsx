@@ -1,6 +1,7 @@
-import { Welcome } from "./components/welcome";
-import WeeklyStreak from "./components/weekly-streak";
 import ProgressTracker from "./components/progress-tracker";
+import TasksAndReminders from "./components/tasks-and-reminders";
+import WeeklyStreak from "./components/weekly-streak";
+import { Welcome } from "./components/welcome";
 
 export default function HomePage() {
   return (
@@ -9,8 +10,9 @@ export default function HomePage() {
       <div className="mt-8">
         <WeeklyStreak />
       </div>
-      <div className="mt-8">
+      <div className="mt-8 flex gap-24 items-start">
         <ProgressTracker />
+        <TasksAndReminders />
       </div>
     </div>
   );
