@@ -1,4 +1,5 @@
 import { Welcome } from "./components/welcome";
+
 import WeeklyStreak from "./components/weekly-streak";
 
 export default function HomePage() {
