@@ -36,7 +36,7 @@ const ToDoList: FC<TodoListProps> = ({
     <div className={`flex flex-col w-full sm:w-64 lg:w-64 ${className}`}>
       {/* To Do List Card */}
       <div className="flex flex-col py-6 px-4 sm:px-8 bg-gray-200 rounded-3xl h-80 sm:h-96">
-        <h3 className="text-base sm:text-lg font-semibold text-black text-center mb-4">Today's Habits</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-black text-center mb-4">Today&apos;s Habits</h3>
         <div className="flex-1 overflow-y-auto space-y-3">
           {habits.length === 0 ? (
             <p className="text-gray-500 text-sm text-center">No habits yet. Click &quot;Add Habit&quot; to get started!</p>
