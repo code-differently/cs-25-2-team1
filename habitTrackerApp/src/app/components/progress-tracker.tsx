@@ -1,10 +1,11 @@
 import React from 'react';
 
-const ProgressTracker = () => {
-  const percentage = 100;
-  const completed = 10;
-  const inProgress = 0;
-  const pending = 0;
+interface ProgressTrackerProps {
+  progress?: number;
+}
+
+const ProgressTracker: React.FC<ProgressTrackerProps> = ({ progress = 0 }) => {
+  const percentage = Math.round(progress);
 
   return (
     <div className="flex flex-col items-center gap-4 sm:gap-6 p-6 sm:p-8 bg-gray-200 rounded-3xl w-full lg:w-auto">
