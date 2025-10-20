@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import HabitModal from './components/habit-modal';
 import ProgressTracker from "./components/progress-tracker";
 import TasksAndReminders from "./components/tasks-and-reminders";
 import ToDoList from "./components/todo-list";
 import WeeklyStreak from "./components/weekly-streak";
 import { Welcome } from "./components/welcome";
-import HabitModal from './components/habit-modal';
 
 // Define the Habit type (matching the one in todo-list.tsx)
 interface Habit {
