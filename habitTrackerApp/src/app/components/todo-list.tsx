@@ -39,7 +39,7 @@ const ToDoList: FC<TodoListProps> = ({
         <h3 className="text-base sm:text-lg font-semibold text-black text-center mb-4">Today's Habits</h3>
         <div className="flex-1 overflow-y-auto space-y-3">
           {habits.length === 0 ? (
-            <p className="text-gray-500 text-sm text-center">No habits yet. Click "Add Habit" to get started!</p>
+            <p className="text-gray-500 text-sm text-center">No habits yet. Click &quot;Add Habit&quot; to get started!</p>
           ) : (
             habits.map((habit) => {
               const IconComponent = iconMap[habit.icon as keyof typeof iconMap];
