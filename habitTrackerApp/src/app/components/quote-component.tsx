@@ -1,7 +1,7 @@
 'use client';
 
-import { useMotivationalQuotes } from '../../hooks/useMotivationalQuotes';
 import React from 'react';
+import { useMotivationalQuotes } from '../../hooks/useMotivationalQuotes';
 
 interface QuoteComponentProps {
   type?: 'random' | 'daily' | 'habit-motivation';
