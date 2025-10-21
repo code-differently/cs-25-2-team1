@@ -169,9 +169,24 @@ export interface WeatherData {
 }
 
 export interface MotivationalQuote {
-  text: string;
+  quote: string;
   author: string;
-  category?: string;
+  category: 'inspirational' | 'daily' | 'success' | 'motivation' | 'habit-motivation' | 'fallback';
+  timestamp?: string;
+  source?: 'zenquotes' | 'fallback';
+}
+
+export interface ZenQuotesResponse {
+  success: boolean;
+  data: MotivationalQuote | MotivationalQuote[];
+  message?: string;
+  cached?: boolean;
+}
+
+export interface ZenQuotesQuery {
+  type?: 'random' | 'daily' | 'multiple' | 'habit-motivation';
+  count?: number;
+  habit_name?: string;
 }
 
 export interface NotificationRequest {
