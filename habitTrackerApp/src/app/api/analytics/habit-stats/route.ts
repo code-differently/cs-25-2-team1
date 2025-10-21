@@ -1,12 +1,18 @@
 import { supabase } from '@/lib/supabaseClient';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const { id } = await params;
+    // Get habit ID from query params instead of URL params
+    const { searchParams } = new URL(request.url);
+    const habitId = searchParams.get('habit_id');
+    
+    if (!habitId) {
+      return NextResponse.json(
+        { success: false, error: 'Bad request', message: 'habit_id parameter is required' },
+        { status: 400 }
+      );
+    }
     
     // Get user from auth header
     const authHeader = request.headers.get('authorization');
@@ -31,7 +37,7 @@ export async function GET(
     const { data: habit, error: habitError } = await supabase
       .from('habits')
       .select('id, name, created_at, frequency')
-      .eq('id', id)
+      .eq('id', habitId)
       .eq('user_id', user.user.id)
       .single();
 
@@ -46,7 +52,7 @@ export async function GET(
     const { data: logs } = await supabase
       .from('habit_logs')
       .select('completed_at')
-      .eq('habit_id', id)
+      .eq('habit_id', habitId)
       .eq('user_id', user.user.id)
       .order('completed_at', { ascending: false });
 
@@ -139,7 +145,7 @@ export async function GET(
         success: true,
         message: 'Habit statistics retrieved successfully',
         data: {
-          habitId: id,
+          habitId,
           habitName: habit.name,
           currentStreak,
           longestStreak,
