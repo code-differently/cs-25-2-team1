@@ -1,4 +1,4 @@
-import { ZenQuotesService } from '../../../lib/services/zenQuotesService';
+import { ZenQuotesService } from '@/lib/services/zenQuotesService';
 import type { APIResponse, MotivationalQuote } from '@/types/api';
 import { NextRequest, NextResponse } from 'next/server';
 

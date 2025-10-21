@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/supabaseClient';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -16,28 +17,56 @@ export async function POST(request: NextRequest) {
     // Validate request data
     const { email, password, firstName, lastName } = registerSchema.parse(body);
     
-    // TODO: Fullstack engineer (you) - implement registration logic here
-    // Example structure:
-    // const { data, error } = await supabase.auth.signUp({
-    //   email,
-    //   password,
-    //   options: {
-    //     data: {
-    //       first_name: firstName,
-    //       last_name: lastName,
-    //     }
-    //   }
-    // });
-    
-    // Placeholder response - you will implement this
+    // Register user with Supabase
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          full_name: `${firstName} ${lastName}`
+        }
+      }
+    });
+
+    if (error) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Registration failed',
+          message: error.message,
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!data.user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Registration failed',
+          message: 'User creation failed',
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       {
         success: true,
-        message: 'Registration endpoint - awaiting your implementation',
+        message: 'Registration successful. Please check your email for verification.',
         data: {
-          user: null,
-          token: null,
-          expiresAt: null,
+          user: {
+            id: data.user.id,
+            email: data.user.email,
+            full_name: data.user.user_metadata?.full_name || null,
+            avatar_url: data.user.user_metadata?.avatar_url || null,
+            created_at: data.user.created_at,
+            updated_at: data.user.updated_at || data.user.created_at,
+          },
+          token: data.session?.access_token || null,
+          expiresAt: data.session?.expires_at ? new Date(data.session.expires_at * 1000).toISOString() : null,
         }
       },
       { status: 201 }
@@ -49,7 +78,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Validation failed',
-          message: error.errors[0].message,
+          message: error.issues[0].message,
         },
         { status: 400 }
       );

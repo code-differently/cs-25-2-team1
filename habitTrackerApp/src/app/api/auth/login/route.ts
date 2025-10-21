@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/supabaseClient';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -14,22 +15,49 @@ export async function POST(request: NextRequest) {
     // Validate request data
     const { email, password } = loginSchema.parse(body);
     
-    // TODO: Fullstack engineer (you) - implement login logic here
-    // Example structure:
-    // const { data, error } = await supabase.auth.signInWithPassword({
-    //   email,
-    //   password,
-    // });
-    
-    // Placeholder response - you will implement this
+    // Authenticate user with Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Authentication failed',
+          message: error.message,
+        },
+        { status: 401 }
+      );
+    }
+
+    if (!data.user || !data.session) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Authentication failed',
+          message: 'Invalid credentials',
+        },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
       {
         success: true,
-        message: 'Login endpoint - awaiting your implementation',
+        message: 'Login successful',
         data: {
-          user: null,
-          token: null,
-          expiresAt: null,
+          user: {
+            id: data.user.id,
+            email: data.user.email,
+            full_name: data.user.user_metadata?.full_name || null,
+            avatar_url: data.user.user_metadata?.avatar_url || null,
+            created_at: data.user.created_at,
+            updated_at: data.user.updated_at || data.user.created_at,
+          },
+          token: data.session.access_token,
+          expiresAt: new Date(data.session.expires_at! * 1000).toISOString(),
         }
       },
       { status: 200 }
@@ -41,7 +69,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Validation failed',
-          message: error.errors[0].message,
+          message: error.issues[0].message,
         },
         { status: 400 }
       );
