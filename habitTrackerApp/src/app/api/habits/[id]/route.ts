@@ -12,18 +12,12 @@ const updateHabitSchema = z.object({
   is_active: z.boolean().optional(),
 });
 
-interface RouteParams {
-  params: {
-    id: string;
-  }
-}
-
 export async function GET(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     // Get user from auth header
     const authHeader = request.headers.get('authorization');
@@ -88,10 +82,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     // Get user from auth header
     const authHeader = request.headers.get('authorization');
@@ -160,10 +154,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     // Get user from auth header
     const authHeader = request.headers.get('authorization');

@@ -2,18 +2,12 @@ import { ZenQuotesService } from '@/lib/services/zenQuotesService';
 import type { APIResponse, MotivationalQuote } from '@/types/api';
 import { NextRequest, NextResponse } from 'next/server';
 
-interface RouteParams {
-  params: {
-    service: string;
-  }
-}
-
 export async function GET(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<{ service: string }> }
 ) {
+  const { service } = await params;
   try {
-    const { service } = params;
     const { searchParams } = new URL(request.url);
 
     switch (service.toLowerCase()) {
@@ -96,7 +90,7 @@ export async function GET(
     }
 
   } catch (error) {
-    console.error(`Integration service error for ${params.service}:`, error);
+    console.error(`Integration service error for ${service}:`, error);
 
     const errorResponse: APIResponse<null> = {
       success: false,
@@ -110,10 +104,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<{ service: string }> }
 ) {
+  const { service } = await params;
   try {
-    const { service } = params;
 
     switch (service.toLowerCase()) {
       case 'zenquotes':
@@ -177,7 +171,7 @@ export async function POST(
     }
 
   } catch (error) {
-    console.error(`Integration service POST error for ${params.service}:`, error);
+    console.error(`Integration service POST error for ${service}:`, error);
 
     const errorResponse: APIResponse<null> = {
       success: false,

@@ -70,7 +70,7 @@ export const QuoteComponent: React.FC<QuoteComponentProps> = ({
   return (
     <div className={`p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-sm ${className}`}>
       <blockquote className="text-gray-800 text-lg italic mb-4">
-        "{quote.quote}"
+        &ldquo;{quote.quote}&rdquo;
       </blockquote>
       <div className="flex justify-between items-center">
         <cite className="text-gray-600 text-sm font-medium">
