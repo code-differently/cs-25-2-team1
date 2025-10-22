@@ -1,7 +1,7 @@
 'use client'
-import { useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function Dashboard() {
   const supabase = createClientComponentClient();
