@@ -199,7 +199,7 @@ const MoodAndQuote = () => {
                    WebkitBoxOrient: 'vertical',
                    lineHeight: quote.quote.length > 100 ? '1.3' : '1.4'
                  }}>
-                "{quote.quote}"
+                &ldquo;{quote.quote}&rdquo;
               </p>
               <p className="text-xs sm:text-sm text-white/80 font-medium">
                 — {quote.author}
