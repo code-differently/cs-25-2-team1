@@ -3,7 +3,6 @@ const nextConfig = {
   output: 'standalone',
   experimental: {
     optimizePackageImports: ['react', 'react-dom'],
-    optimizeCss: false,
   },
   webpack: (config) => {
     config.resolve.alias = {
