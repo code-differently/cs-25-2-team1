@@ -13,7 +13,7 @@ export default function Dashboard() {
               <p className="text-gray-600">Track your daily habits and see your progress over time.</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+              <h2 className="text-xl font-semibinal mb-4">Recent Activity</h2>
               <p className="text-gray-600">View your recent habit completions and journal entries.</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
