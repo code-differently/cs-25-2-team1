@@ -1,21 +1,37 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import TasksAndReminders from '../../src/app/components/tasks-and-reminders';
+import MoodAndQuote from '../../src/app/components/mood-and-quotes';
 
-describe('TasksAndReminders Component (with Mood Tracker)', () => {
+// Mock the useDailyQuote hook
+jest.mock('../../src/hooks/useDailyQuote', () => ({
+  useDailyQuote: () => ({
+    quote: {
+      quote: "Test motivational quote",
+      author: "Test Author",
+      category: "motivation",
+      source: "fallback"
+    },
+    loading: false,
+    error: null,
+    refreshQuote: jest.fn()
+  })
+}));
+
+describe('MoodAndQuote Component (with Daily Quotes)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders mood tracker and reminders sections', () => {
-    render(<TasksAndReminders />);
+  it('renders mood tracker and daily quote sections', () => {
+    render(<MoodAndQuote />);
     
     expect(screen.getByText('Mood')).toBeInTheDocument();
-    expect(screen.getByText('Reminders')).toBeInTheDocument();
+    expect(screen.getByText(/Test motivational quote/)).toBeInTheDocument();
+    expect(screen.getByText(/Test Author/)).toBeInTheDocument();
     expect(screen.getByText('Today I feel...')).toBeInTheDocument();
   });
 
   it('displays mood selection dropdown when clicked', () => {
-    render(<TasksAndReminders />);
+    render(<MoodAndQuote />);
     
     const dropdownButton = screen.getByText('Today I feel...');
     fireEvent.click(dropdownButton);
@@ -33,7 +49,7 @@ describe('TasksAndReminders Component (with Mood Tracker)', () => {
   });
 
   it('selects a mood and displays it correctly', () => {
-    render(<TasksAndReminders />);
+    render(<MoodAndQuote />);
     
     // Open dropdown
     const dropdownButton = screen.getByText('Today I feel...');
@@ -52,7 +68,7 @@ describe('TasksAndReminders Component (with Mood Tracker)', () => {
   });
 
   it('allows changing mood after selection', () => {
-    render(<TasksAndReminders />);
+    render(<MoodAndQuote />);
     
     // Select a mood first
     fireEvent.click(screen.getByText('Today I feel...'));
@@ -69,7 +85,7 @@ describe('TasksAndReminders Component (with Mood Tracker)', () => {
   });
 
   it('toggles dropdown arrow correctly', () => {
-    render(<TasksAndReminders />);
+    render(<MoodAndQuote />);
     
     const dropdownButton = screen.getByText('Today I feel...').closest('button');
     
@@ -86,7 +102,7 @@ describe('TasksAndReminders Component (with Mood Tracker)', () => {
   });
 
   it('closes dropdown when mood is selected', () => {
-    render(<TasksAndReminders />);
+    render(<MoodAndQuote />);
     
     // Open dropdown
     fireEvent.click(screen.getByText('Today I feel...'));
@@ -102,7 +118,7 @@ describe('TasksAndReminders Component (with Mood Tracker)', () => {
   });
 
   it('renders all mood options in dropdown', () => {
-    render(<TasksAndReminders />);
+    render(<MoodAndQuote />);
     
     fireEvent.click(screen.getByText('Today I feel...'));
     
@@ -117,7 +133,7 @@ describe('TasksAndReminders Component (with Mood Tracker)', () => {
   });
 
   it('has correct styling for mood card', () => {
-    const { container } = render(<TasksAndReminders />);
+    const { container } = render(<MoodAndQuote />);
     
     const moodCard = container.querySelector('.bg-white.border-2.border-gray-300');
     expect(moodCard).toBeInTheDocument();
@@ -125,7 +141,7 @@ describe('TasksAndReminders Component (with Mood Tracker)', () => {
   });
 
   it('has correct styling for reminders card', () => {
-    const { container } = render(<TasksAndReminders />);
+    const { container } = render(<MoodAndQuote />);
     
     const reminderCard = container.querySelector('.bg-indigo-700');
     expect(reminderCard).toBeInTheDocument();
@@ -133,14 +149,14 @@ describe('TasksAndReminders Component (with Mood Tracker)', () => {
   });
 
   it('has responsive classes applied', () => {
-    const { container } = render(<TasksAndReminders />);
+    const { container } = render(<MoodAndQuote />);
     
     const mainContainer = container.firstChild;
     expect(mainContainer).toHaveClass('w-full', 'sm:w-64', 'lg:w-64');
   });
 
   it('renders SVG icons for selected moods', () => {
-    const { container } = render(<TasksAndReminders />);
+    const { container } = render(<MoodAndQuote />);
     
     // Select a mood
     fireEvent.click(screen.getByText('Today I feel...'));
@@ -153,7 +169,7 @@ describe('TasksAndReminders Component (with Mood Tracker)', () => {
   });
 
   it('maintains dropdown accessibility', () => {
-    render(<TasksAndReminders />);
+    render(<MoodAndQuote />);
     
     const dropdownButton = screen.getByText('Today I feel...').closest('button');
     expect(dropdownButton).toHaveAttribute('type', 'button');

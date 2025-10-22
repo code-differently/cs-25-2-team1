@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useDailyQuote } from '../../hooks/useDailyQuote';
 
-const TasksAndReminders = () => {
+const MoodAndQuote = () => {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { quote, loading, error, refreshQuote } = useDailyQuote();
 
   // Custom SVG Icons
   const HappyFace = () => (
@@ -163,12 +165,63 @@ const TasksAndReminders = () => {
         )}
       </div>
       
-      {/* Reminders Card */}
-      <div className="flex items-start justify-center py-6 px-4 sm:px-8 bg-indigo-700 rounded-3xl h-36 sm:h-44">
-        <h3 className="text-base sm:text-lg font-semibold text-white text-center">Reminders</h3>
+      {/* Daily Quote Card */}
+      <div className="flex flex-col items-center justify-center py-4 px-4 sm:px-6 bg-indigo-700 rounded-3xl h-36 sm:h-44 relative">
+        {loading ? (
+          <div className="flex flex-col items-center gap-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+            <span className="text-xs text-white/80">Loading quote...</span>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center gap-2 text-center">
+            <span className="text-sm text-white/90">💭</span>
+            <span className="text-xs text-white/80">Quote unavailable</span>
+            <button 
+              onClick={refreshQuote}
+              className="text-xs text-white underline hover:text-white/80"
+            >
+              Try again
+            </button>
+          </div>
+        ) : quote ? (
+          <div className="flex flex-col items-center text-center h-full justify-between px-1">
+            <div className="flex-1 flex flex-col justify-center min-h-0">
+              <p className={`text-white leading-relaxed mb-2 overflow-hidden font-medium ${
+                  quote.quote.length > 100 
+                    ? 'text-xs sm:text-sm' 
+                    : quote.quote.length > 60 
+                    ? 'text-sm sm:text-base' 
+                    : 'text-sm sm:text-lg'
+                }`}
+                 style={{
+                   display: '-webkit-box',
+                   WebkitLineClamp: quote.quote.length > 100 ? 4 : 3,
+                   WebkitBoxOrient: 'vertical',
+                   lineHeight: quote.quote.length > 100 ? '1.3' : '1.4'
+                 }}>
+                &ldquo;{quote.quote}&rdquo;
+              </p>
+              <p className="text-xs sm:text-sm text-white/80 font-medium">
+                — {quote.author}
+              </p>
+            </div>
+            <button 
+              onClick={refreshQuote}
+              className="text-xs text-white/60 hover:text-white/80 transition-colors mt-1 flex-shrink-0"
+              title="Get new quote"
+            >
+              ↻
+            </button>
+          </div>
+        ) : (
+          <div className="text-center">
+            <span className="text-sm text-white/90">💭</span>
+            <p className="text-xs text-white/80 mt-1">No quote available</p>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default TasksAndReminders;
+export default MoodAndQuote;
