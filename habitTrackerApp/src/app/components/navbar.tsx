@@ -13,7 +13,7 @@ export const Navbar: FC<NavbarProps> = ({}) => {
             </div>
 
             {/* navigation links*/}
-            <Link href="/dashboard" className="nav-link hover:bg-indigo-500 hover:text-neutral-950 active:bg-indigo-800 text-center w-full py-2 rounded">
+            <Link href="/" className="nav-link hover:bg-indigo-500 hover:text-neutral-950 active:bg-indigo-800 text-center w-full py-2 rounded">
                 Dashboard
             </Link>
             <Link href="/habits" className="nav-link hover:bg-indigo-500 hover:text-neutral-950 active:bg-indigo-800 text-center w-full py-2 rounded">
