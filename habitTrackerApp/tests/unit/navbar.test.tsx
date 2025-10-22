@@ -1,10 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { Navbar, NavbarProps } from '../../src/app/components/navbar';
+import { Navbar } from '../../src/app/components/navbar';
 
 // Mock Next.js Link component
 jest.mock('next/link', () => {
-  return ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
+  return ({ children, href, ...props }: any) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
   );
 });
 
@@ -18,39 +20,25 @@ jest.mock('lucide-react', () => ({
   ),
 }));
 
-// Mock Next.js Link component
-jest.mock('next/link', () => {
-  return ({ children, href, ...props }: any) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  );
-});
-
 describe('Navbar Component', () => {
-  const defaultProps: NavbarProps = {
-    url: 'Habit Tracker',
-    title: 'Your Personal Journey',
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset body overflow style
     document.body.style.overflow = 'unset';
   });
 
-  it('renders desktop navigation with correct title and url', () => {
-    render(<Navbar {...defaultProps} />);
+  it('renders desktop navigation with correct title and subtitle', () => {
+    render(<Navbar />);
     
     // Fix: Use getAllByText since "Habit Tracker" appears in both desktop and mobile
     const habitTrackerElements = screen.getAllByText('Habit Tracker');
     expect(habitTrackerElements.length).toBe(2); // Desktop + Mobile
     
-    expect(screen.getByText('Your Personal Journey')).toBeInTheDocument();
+    expect(screen.getByText('Stay on track')).toBeInTheDocument();
   });
 
   it('renders all navigation links', () => {
-    render(<Navbar {...defaultProps} />);
+    render(<Navbar />);
     
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Habits')).toBeInTheDocument();
@@ -59,10 +47,10 @@ describe('Navbar Component', () => {
   });
 
   it('has correct href attributes for navigation links', () => {
-    render(<Navbar {...defaultProps} />);
+    render(<Navbar />);
     
     const dashboardLinks = screen.getAllByText('Dashboard');
-    expect(dashboardLinks[0].closest('a')).toHaveAttribute('href', '/dashboard');
+    expect(dashboardLinks[0].closest('a')).toHaveAttribute('href', '/');
     
     const habitsLinks = screen.getAllByText('Habits');
     expect(habitsLinks[0].closest('a')).toHaveAttribute('href', '/habits');
@@ -75,7 +63,7 @@ describe('Navbar Component', () => {
   });
 
   it('toggles mobile menu when hamburger button is clicked', () => {
-    render(<Navbar {...defaultProps} />);
+    render(<Navbar />);
     
     const menuButton = screen.getByLabelText('Toggle navigation menu');
     
@@ -99,7 +87,7 @@ describe('Navbar Component', () => {
   });
 
   it('closes mobile menu when overlay is clicked', () => {
-    render(<Navbar {...defaultProps} />);
+    render(<Navbar />);
     
     const menuButton = screen.getByLabelText('Toggle navigation menu');
     fireEvent.click(menuButton); // Open menu
@@ -114,10 +102,8 @@ describe('Navbar Component', () => {
     expect(screen.getByTestId('menu-icon')).toBeInTheDocument();
   });
 
-
-
   it('prevents body scroll when mobile menu is open', () => {
-    render(<Navbar {...defaultProps} />);
+    render(<Navbar />);
     
     const menuButton = screen.getByLabelText('Toggle navigation menu');
     
@@ -131,7 +117,7 @@ describe('Navbar Component', () => {
   });
 
   it('closes mobile menu when a navigation link is clicked', async () => {
-    render(<Navbar url="Test" title="Test Title" />);
+    render(<Navbar />);
     
     // Open mobile menu
     const menuButton = screen.getByLabelText('Toggle navigation menu');
@@ -152,16 +138,16 @@ describe('Navbar Component', () => {
     expect(screen.queryByTestId('x-icon')).not.toBeInTheDocument();
   });
 
-  it('displays fallback title when url is not provided', () => {
-    render(<Navbar url="" title={defaultProps.title} />);
+  it('displays Habit Tracker title consistently', () => {
+    render(<Navbar />);
     
-    // Should show "Habit Tracker" as fallback in mobile header
+    // Should show "Habit Tracker" in both desktop and mobile headers
     const headers = screen.getAllByText('Habit Tracker');
-    expect(headers.length).toBeGreaterThan(0);
+    expect(headers.length).toBe(2); // Desktop + Mobile
   });
 
   it('has correct responsive classes', () => {
-    const { container } = render(<Navbar {...defaultProps} />);
+    const { container } = render(<Navbar />);
     
     // Desktop nav should be hidden on small screens
     const desktopNav = container.querySelector('.hidden.lg\\:flex');
