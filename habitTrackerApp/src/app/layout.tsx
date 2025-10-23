@@ -1,4 +1,5 @@
 'use client'
+import { Navbar } from "./components/navbar";
 import { Inter } from "next/font/google";
 import useEnsureProfile from "../hooks/useEnsureProfile";
 import "./globals.css";
@@ -18,8 +19,14 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body>
-        {children}
+      <body className={inter.className}>
+        <div className="flex min-h-screen">
+          <Navbar 
+          />
+          <main className="flex-1 lg:ml-64 pt-16 lg:pt-0">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );

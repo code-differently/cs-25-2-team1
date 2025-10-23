@@ -101,7 +101,7 @@ const MoodAndQuote = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-4 w-full sm:w-64 lg:w-64">
+    <div className="flex flex-col gap-4 w-full sm:w-64 lg:w-64 overflow-visible">
       {/* Mood Tracker Card */}
       <div className="flex flex-col items-center justify-center py-6 px-4 sm:px-8 bg-white border-2 border-gray-300 rounded-3xl h-36 sm:h-44">
         <h3 className="text-base sm:text-lg font-semibold text-black mb-2 sm:mb-4">Mood</h3>
@@ -166,7 +166,7 @@ const MoodAndQuote = () => {
       </div>
       
       {/* Daily Quote Card */}
-      <div className="flex flex-col items-center justify-center py-4 px-4 sm:px-6 bg-indigo-700 rounded-3xl h-36 sm:h-44 relative">
+      <div className="flex flex-col items-center justify-center py-4 px-4 sm:px-6 bg-indigo-700 rounded-3xl h-36 sm:h-44 relative overflow-visible">
         {loading ? (
           <div className="flex flex-col items-center gap-2">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
@@ -184,23 +184,48 @@ const MoodAndQuote = () => {
             </button>
           </div>
         ) : quote ? (
-          <div className="flex flex-col items-center text-center h-full justify-between px-1">
-            <div className="flex-1 flex flex-col justify-center min-h-0">
-              <p className={`text-white leading-relaxed mb-2 overflow-hidden font-medium ${
-                  quote.quote.length > 100 
-                    ? 'text-xs sm:text-sm' 
-                    : quote.quote.length > 60 
-                    ? 'text-sm sm:text-base' 
-                    : 'text-sm sm:text-lg'
-                }`}
-                 style={{
-                   display: '-webkit-box',
-                   WebkitLineClamp: quote.quote.length > 100 ? 4 : 3,
-                   WebkitBoxOrient: 'vertical',
-                   lineHeight: quote.quote.length > 100 ? '1.3' : '1.4'
-                 }}>
-                &ldquo;{quote.quote}&rdquo;
-              </p>
+          <div className="flex flex-col items-center text-center h-full justify-between px-1 relative">
+            <div className="flex-1 flex flex-col justify-center min-h-0 relative overflow-visible">
+              <div className="group/tooltip relative overflow-visible">
+                <p 
+                  className={`text-white leading-relaxed mb-2 overflow-hidden font-medium cursor-help ${
+                    quote.quote.length > 100 
+                      ? 'text-xs sm:text-sm' 
+                      : quote.quote.length > 60 
+                      ? 'text-sm sm:text-base' 
+                      : 'text-sm sm:text-lg'
+                  }`}
+                  style={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: quote.quote.length > 100 ? 4 : 3,
+                    WebkitBoxOrient: 'vertical',
+                    lineHeight: quote.quote.length > 100 ? '1.3' : '1.4'
+                  }}
+                >
+                  &ldquo;{quote.quote}&rdquo;
+                </p>
+                
+                {/* Tooltip for all quotes */}
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 scale-95 group-hover/tooltip:opacity-100 group-hover/tooltip:scale-100 transition-all duration-200 ease-out pointer-events-none z-[9999]">
+                  <div 
+                    className="bg-gray-900 text-white text-sm rounded-lg p-3 shadow-2xl border border-gray-600 max-w-sm"
+                    style={{ 
+                      width: '320px',
+                      maxWidth: 'calc(100vw - 2rem)',
+                    }}
+                  >
+                    <div className="text-center leading-relaxed">
+                      <div className="font-medium text-white">&ldquo;{quote.quote}&rdquo;</div>
+                      <div className="mt-2 text-gray-300 text-xs">— {quote.author}</div>
+                    </div>
+                    {/* Arrow pointing down */}
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2">
+                      <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-gray-900"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               <p className="text-xs sm:text-sm text-white/80 font-medium">
                 — {quote.author}
               </p>
