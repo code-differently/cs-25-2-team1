@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User } from '@supabase/supabase-js';
 
@@ -13,11 +13,7 @@ export default function GoogleCalendarConnect({ user }: GoogleCalendarConnectPro
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClientComponentClient();
 
-  useEffect(() => {
-    checkGoogleConnection();
-  }, []);
-
-  const checkGoogleConnection = async () => {
+  const checkGoogleConnection = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('user_google_tokens')
@@ -33,7 +29,11 @@ export default function GoogleCalendarConnect({ user }: GoogleCalendarConnectPro
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user.id, supabase]);
+
+  useEffect(() => {
+    checkGoogleConnection();
+  }, [checkGoogleConnection]);
 
   const connectToGoogle = () => {
     // Redirect to Google OAuth

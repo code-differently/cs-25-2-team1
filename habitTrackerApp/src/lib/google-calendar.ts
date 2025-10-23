@@ -1,4 +1,5 @@
-import { NextRequest } from 'next/server';
+import { google } from 'googleapis';
+import type { calendar_v3 } from 'googleapis';
 
 interface CalendarEvent {
   id?: string;
@@ -22,7 +23,7 @@ interface CalendarEvent {
 }
 
 export class GoogleCalendarService {
-  private calendar;
+  private calendar: calendar_v3.Calendar;
 
   constructor(accessToken: string) {
     const auth = new google.auth.OAuth2();
