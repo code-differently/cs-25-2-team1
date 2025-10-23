@@ -29,6 +29,10 @@ CREATE POLICY "Users can update own profile" ON public.users
 CREATE POLICY "Users can insert own profile" ON public.users
   FOR INSERT WITH CHECK (auth.uid() = id);
 
+-- Allow service role to insert user profiles (for trigger and admin operations)
+CREATE POLICY "Service role can insert user profiles" ON public.users
+  FOR INSERT WITH CHECK (true);
+
 -- ===============================================
 -- HABITS TABLE
 -- ===============================================
@@ -150,16 +154,18 @@ CREATE TRIGGER set_updated_at_habits
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
+  -- Insert into public.users with RLS bypass
   INSERT INTO public.users (id, email, full_name, avatar_url)
   VALUES (
     NEW.id,
     NEW.email,
-    NEW.raw_user_meta_data->>'full_name',
+    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
     NEW.raw_user_meta_data->>'avatar_url'
-  );
+  )
+  ON CONFLICT (id) DO NOTHING; -- Handle potential duplicates gracefully
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users

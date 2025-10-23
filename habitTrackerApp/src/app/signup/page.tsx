@@ -1,40 +1,43 @@
 // src/app/signup/page.tsx
 'use client'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { supabase } from '../../lib/supabaseClient'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
-  const supabase = createClientComponentClient()
-  const router = useRouter()
+  const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setMessage('')
-
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
     })
 
-    setLoading(false)
-    
+    console.log('Signup result:', { data, error })
+
     if (error) {
-      setMessage(error.message)
-    } else if (data.user) {
-      setMessage('Check your email to confirm your account!')
-      // Optionally redirect after a delay
+      console.error('Signup error:', error)
+      setMessage(`Signup failed: ${error.message}`)
+    } else {
+      setMessage('Account created successfully! Check your email to confirm your account.')
+      // The useEnsureProfile hook in layout.tsx will automatically create the profile
+      // when the user confirms their email and gets a session
       setTimeout(() => router.push('/login'), 3000)
     }
+    
+    setLoading(false)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center text-black">
       <div className="max-w-md w-full space-y-8 p-8">
         <h2 className="text-3xl font-bold text-center">Sign Up</h2>
         <form onSubmit={handleSignup} className="space-y-6">
