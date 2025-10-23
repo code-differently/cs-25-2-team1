@@ -41,6 +41,12 @@ const fallbackQuotes: MotivationalQuote[] = [
     author: "Unknown",
     category: "motivation",
     source: "fallback"
+  },
+  {
+    quote: "The greatest glory in living lies not in never falling, but in rising every time we fall. We must accept finite disappointment, but never lose infinite hope because the future belongs to those who believe in the beauty of their dreams and work towards making them reality.",
+    author: "Nelson Mandela & Martin Luther King Jr.",
+    category: "inspirational",
+    source: "fallback"
   }
 ];
 

@@ -1,22 +1,17 @@
 'use client'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
-import GoogleCalendarConnect from '../components/GoogleCalendarConnect';
+import { useEffect } from 'react';
 
 export default function Dashboard() {
   const supabase = createClientComponentClient();
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.push('/login');
-      } else {
-        setUser(session.user);
       }
     };
     checkAuth();
