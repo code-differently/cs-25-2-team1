@@ -1,4 +1,3 @@
-import { google } from 'googleapis';
 import { NextRequest } from 'next/server';
 
 interface CalendarEvent {
