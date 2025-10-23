@@ -1,17 +1,22 @@
 'use client'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { User } from '@supabase/supabase-js';
+import GoogleCalendarConnect from '../components/GoogleCalendarConnect';
 
 export default function Dashboard() {
   const supabase = createClientComponentClient();
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.push('/login');
+      } else {
+        setUser(session.user);
       }
     };
     checkAuth();
@@ -20,6 +25,14 @@ export default function Dashboard() {
     <div className="max-w-7xl mx-auto p-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Dashboard</h1>
       <p className="text-green-600 font-bold text-xl mb-6">Hello World! Dashboard is working! 🚀</p>
+      
+      {/* Google Calendar Integration */}
+      {user && (
+        <div className="mb-8">
+          <GoogleCalendarConnect user={user} />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Habit Progress</h2>
