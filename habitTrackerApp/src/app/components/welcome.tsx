@@ -1,4 +1,5 @@
 import { FC } from "react";
+import Link from "next/link";
 
 export interface WelcomeProps {
     userName?: string;
@@ -19,15 +20,15 @@ export const Welcome: FC<WelcomeProps> = ({ userName = "Jane", className = "", o
         {/* Add Task Button */}
         <button 
           onClick={onAddHabit}
-          className="w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2 text-white text-sm sm:text-base font-medium bg-blue-500 rounded-full hover:bg-blue-600 transition-colors"
+          className="w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2 text-white text-sm sm:text-base font-medium bg-indigo-700 rounded-full hover:bg-indigo-800 transition-colors"
         >
           Add Habit
         </button>
         
         {/* Journal Button */}
-        <button className="w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2 text-indigo-700 text-sm sm:text-base font-medium bg-white border-2 border-indigo-700 rounded-full hover:bg-indigo-50 transition-colors">
-          Journal
-        </button>
+        <Link href="/journaling" passHref legacyBehavior>
+          <a className="w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2 text-indigo-700 text-sm sm:text-base font-medium bg-white border-2 border-indigo-700 rounded-full hover:bg-indigo-50 transition-colors text-center">Journal</a>
+        </Link>
       </div>
     </div>
     );
