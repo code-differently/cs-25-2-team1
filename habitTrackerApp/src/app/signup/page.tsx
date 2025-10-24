@@ -7,6 +7,8 @@ import { useState } from 'react'
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [verifying, setVerifying] = useState(false)
@@ -31,6 +33,8 @@ export default function SignupPage() {
       const result = await signUp.create({
         emailAddress: email,
         password,
+        firstName,
+        lastName,
       })
 
       console.log('Signup result:', result)
@@ -107,6 +111,24 @@ export default function SignupPage() {
           <>
             <h2 className="text-3xl font-bold text-center">Sign Up</h2>
             <form onSubmit={handleSignup} className="space-y-6">
+              <input 
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="First Name"
+                className="w-full px-3 py-2 border rounded-md"
+                required
+                disabled={loading}
+              />
+              <input 
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Last Name"
+                className="w-full px-3 py-2 border rounded-md"
+                required
+                disabled={loading}
+              />
               <input 
                 type="email" 
                 value={email} 
@@ -190,6 +212,8 @@ export default function SignupPage() {
             {/* Debug info */}
             <div className="text-xs text-gray-500 mt-4">
               <p>Debug: signUp available: {signUp ? 'Yes' : 'No'}</p>
+              <p>First Name: {firstName}</p>
+              <p>Last Name: {lastName}</p>
               <p>Email: {email}</p>
               <p>Password length: {password.length}</p>
             </div>
