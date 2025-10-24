@@ -1,52 +1,99 @@
 'use client'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
-import GoogleCalendarConnect from '../components/GoogleCalendarConnect';
+import HabitModal from '../components/habit-modal';
+import ProgressTracker from "../components/progress-tracker";
+import MoodAndQuote from "../components/mood-and-quotes";
+import ToDoList from "../components/todo-list";
+import WeeklyStreak from "../components/weekly-streak";
+import { Welcome } from "../components/welcome";
+
+// Define the Habit type (matching the one in todo-list.tsx)
+interface Habit {
+  id: string;
+  name: string;
+  icon: string;
+  interval: string;
+  completed: boolean;
+}
 
 export default function Dashboard() {
-  const supabase = createClientComponentClient();
+  const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [habits, setHabits] = useState<Habit[]>([]);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push('/login');
-      } else {
-        setUser(session.user);
-      }
-    };
-    checkAuth();
-  }, [supabase, router]);
-  return (
-    <div className="max-w-7xl mx-auto p-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Dashboard</h1>
-      <p className="text-green-600 font-bold text-xl mb-6">Hello World! Dashboard is working! 🚀</p>
-      
-      {/* Google Calendar Integration */}
-      {user && (
-        <div className="mb-8">
-          <GoogleCalendarConnect user={user} />
-        </div>
-      )}
+    if (isLoaded && !user) {
+      router.push('/login');
+    }
+  }, [user, isLoaded, router]);
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Habit Progress</h2>
-          <p className="text-gray-600">Track your daily habits and see your progress over time.</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-          <p className="text-gray-600">View your recent habit completions and journal entries.</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Quick Stats</h2>
-          <p className="text-gray-600">Get an overview of your habit tracking statistics.</p>
+  // Handle creating a new habit
+  const handleCreateHabit = (name: string, icon: string, interval: string) => {
+    const newHabit: Habit = {
+      id: Date.now().toString(), // Simple ID generation
+      name,
+      icon,
+      interval,
+      completed: false,
+    };
+    
+    setHabits(prev => [...prev, newHabit]);
+    setIsModalOpen(false);
+  };
+
+  // Handle toggling habit completion
+  const handleToggleHabit = (habitId: string) => {
+    setHabits(prev => 
+      prev.map(habit => 
+        habit.id === habitId 
+          ? { ...habit, completed: !habit.completed }
+          : habit
+      )
+    );
+  };
+
+  // Calculate progress for the progress tracker
+  const completedHabits = habits.filter(h => h.completed).length;
+  const totalHabits = habits.length;
+  const progressPercentage = totalHabits > 0 ? (completedHabits / totalHabits) * 100 : 0;
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5B4CCC] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
+    );
+  }
+
+  const firstName = user?.firstName || "";
+  return (
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
+      <Welcome onAddHabit={() => setIsModalOpen(true)} userName={firstName} />
+      <div className="mt-4 sm:mt-6 lg:mt-8">
+        <WeeklyStreak />
+      </div>
+      <div className="mt-4 sm:mt-6 lg:mt-8 flex flex-col lg:flex-row gap-6 lg:gap-24 items-start ml-0 sm:ml-4 lg:ml-8">
+        <ProgressTracker progress={progressPercentage} />
+        <MoodAndQuote />
+        <ToDoList 
+          habits={habits}
+          onToggleHabit={handleToggleHabit}
+        />
+      </div>
+
+      {/* Habit Creation Modal*/}
+      <HabitModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreateHabit={handleCreateHabit}
+      />
     </div>
   );
 }

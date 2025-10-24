@@ -1,21 +1,17 @@
 'use client'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function Habits() {
-  const supabase = createClientComponentClient();
+  const { user, isLoaded } = useUser();
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push('/login');
-      }
-    };
-    checkAuth();
-  }, [supabase, router]);
+    if (isLoaded && !user) {
+      router.push('/login');
+    }
+  }, [user, isLoaded, router]);
   return (
     <div className="max-w-7xl mx-auto p-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Habits</h1>

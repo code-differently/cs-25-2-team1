@@ -3,11 +3,13 @@
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { FC, useEffect, useState } from "react";
+import { useClerk } from '@clerk/nextjs';
 
 export interface NavbarProps {}
 
 export const Navbar: FC<NavbarProps> = ({}) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { signOut } = useClerk();
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -49,6 +51,12 @@ export const Navbar: FC<NavbarProps> = ({}) => {
                 <Link href="/journaling" className="nav-link hover:bg-indigo-500 hover:text-neutral-950 active:bg-indigo-800 text-center w-full py-2 rounded">
                     Journaling
                 </Link>
+                <button
+                    onClick={() => signOut()}
+                    className="nav-link bg-red-500 hover:bg-red-600 text-white text-center w-full py-2 rounded mt-4"
+                >
+                    Sign Out
+                </button>
             </nav>
 
             {/* Mobile Navbar - Added Part */}
@@ -109,6 +117,12 @@ export const Navbar: FC<NavbarProps> = ({}) => {
                                 >
                                     Journaling
                                 </Link>
+                                <button
+                                    onClick={() => { signOut(); toggleMobileMenu(); }}
+                                    className="block nav-link bg-red-500 hover:bg-red-600 text-white text-center w-full py-2 rounded mt-4 transition-colors duration-200"
+                                >
+                                    Sign Out
+                                </button>
                             </div>
                         </nav>
                     </div>
