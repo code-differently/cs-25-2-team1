@@ -65,7 +65,7 @@ export default function Dashboard() {
     if (isLoaded && user) {
       fetchHabitsAndCompletions();
     }
-  }, [isLoaded, user]);
+  }, [isLoaded, user, supabase]);
 
   // Create daily habit in Supabase
   const handleCreateHabit = async (name: string, icon: string, interval: string) => {

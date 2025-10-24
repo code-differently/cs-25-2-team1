@@ -55,10 +55,22 @@ const iconMap = {
 };
 
 export default function Habits() {
+
+  const { user, isLoaded } = useUser();
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5B4CCC] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   // All hooks must be called before any conditional return
   const [showDailyConfetti, setShowDailyConfetti] = useState(false);
   const [showWeeklyConfetti, setShowWeeklyConfetti] = useState(false);
-  const { user, isLoaded } = useUser();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -105,7 +117,7 @@ export default function Habits() {
     if (isLoaded && user) {
       fetchHabitsAndCompletions();
     }
-  }, [isLoaded, user]);
+  }, [isLoaded, user, supabase]);
 
   // Assign color based on interval
   const getIntervalColor = (interval: string) => {

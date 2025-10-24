@@ -42,7 +42,7 @@ const WeeklyStreak: React.FC<WeeklyStreakProps> = ({ habits = [] }) => {
         completed: allCompleted,
       };
     });
-  }, [habits]);
+  }, [habits, weekDates]);
 
   return (
     <div className="flex flex-col items-center gap-4 py-6 sm:py-8 px-4 sm:px-6 bg-white rounded-3xl shadow-sm w-full">
