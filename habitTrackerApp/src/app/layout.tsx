@@ -1,5 +1,6 @@
 'use client'
 import { Navbar } from "./components/navbar";
+import { usePathname } from "next/navigation";
 import { Inter } from "next/font/google";
 import useEnsureProfile from "../hooks/useEnsureProfile";
 import { ClerkProvider } from '@clerk/nextjs'
@@ -15,17 +16,17 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // This ensures user profile is created/updated after any auth state change
   useEnsureProfile();
+  const pathname = usePathname();
+  const hideNavbar = pathname === "/login" || pathname === "/signup";
 
   return (
     <ClerkProvider>
       <html lang="en">
         <body className={inter.className}>
           <div className="flex min-h-screen">
-            <Navbar 
-            />
-            <main className="flex-1 lg:ml-64 pt-16 lg:pt-0">
+            {!hideNavbar && <Navbar />}
+            <main className={`flex-1 ${!hideNavbar ? "lg:ml-64 pt-16 lg:pt-0" : ""}`}>
               {children}
             </main>
           </div>
