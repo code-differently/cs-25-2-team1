@@ -1,6 +1,5 @@
 'use client'
 
-
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
@@ -17,8 +16,6 @@ import interactionPlugin from '@fullcalendar/interaction';
 
 import HabitModal from '../components/habit-modal';
 import { CheckCircle, Circle, Zap, Lightbulb, Heart, Briefcase, Check, Lock, Coffee, Sparkles } from 'lucide-react';
-
-// Define the Habit type (matching todo-list and dashboard)
 
 interface Habit {
   id: string;
@@ -55,38 +52,45 @@ const iconMap = {
 };
 
 export default function Habits() {
-
-  // All hooks must be called before any conditional return
+  // ALL HOOKS MUST BE AT THE TOP - BEFORE ANY CONDITIONAL RETURNS
   const { user, isLoaded } = useUser();
+  const router = useRouter();
+  const supabase = createClientComponentClient();
+  const calendarRef = useRef<any>(null);
+  
   const [showDailyConfetti, setShowDailyConfetti] = useState(false);
   const [showWeeklyConfetti, setShowWeeklyConfetti] = useState(false);
-  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [habits, setHabits] = useState<Habit[]>([]);
   const [completions, setCompletions] = useState<{ habit_id: string }[]>([]);
-  const supabase = createClientComponentClient();
-  const calendarRef = useRef<any>(null);
+  const [selectedInterval, setSelectedInterval] = useState<string>('Daily');
+
+  // Helper function
   const getCalendarView = (interval: string) => {
     if (interval === 'Daily') return 'dayGridDay';
     if (interval === 'Weekly') return 'dayGridWeek';
     if (interval === 'Monthly') return 'dayGridMonth';
     return 'dayGridMonth';
   };
-  const [selectedInterval, setSelectedInterval] = useState<string>('Daily');
 
-  // All hooks must be called before any conditional return
-  // ...existing hook calls...
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5B4CCC] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  const getIntervalColor = (interval: string) => {
+    if (interval === 'Daily') return '#bfdbfe';
+    if (interval === 'Weekly') return '#fecaca';
+    if (interval === 'Monthly') return '#fef9c3';
+    return '#f3f4f6';
+  };
 
+  // Calculate filtered habits and progress
+  const filteredHabits = habits.filter(habit => {
+    if (selectedInterval === 'Daily') return habit.interval === 'Daily';
+    if (selectedInterval === 'Weekly') return habit.interval === 'Daily' || habit.interval === 'Weekly';
+    if (selectedInterval === 'Monthly') return habit.interval === 'Daily' || habit.interval === 'Weekly' || habit.interval === 'Monthly';
+    return false;
+  });
+  const completedCount = filteredHabits.filter(habit => completions.some(c => c.habit_id === habit.id)).length;
+  const progress = filteredHabits.length > 0 ? (completedCount / filteredHabits.length) * 100 : 0;
+
+  // ALL useEffect HOOKS - MUST BE BEFORE ANY CONDITIONAL RETURNS
   useEffect(() => {
     if (isLoaded && !user) {
       router.push('/login');
@@ -121,15 +125,39 @@ export default function Habits() {
     }
   }, [isLoaded, user, supabase]);
 
-  // Assign color based on interval
-  const getIntervalColor = (interval: string) => {
-    if (interval === 'Daily') return '#bfdbfe';
-    if (interval === 'Weekly') return '#fecaca';
-    if (interval === 'Monthly') return '#fef9c3';
-    return '#f3f4f6';
-  };
+  useEffect(() => {
+    const calendarApi = calendarRef.current?.getApi?.();
+    if (calendarApi) {
+      Promise.resolve().then(() => {
+        calendarApi.changeView(getCalendarView(selectedInterval));
+      });
+    }
+  }, [selectedInterval]);
 
-  // Create habit in Supabase
+  useEffect(() => {
+    if (selectedInterval === 'Daily' && progress === 100 && filteredHabits.length > 0) {
+      setShowDailyConfetti(true);
+      setTimeout(() => setShowDailyConfetti(false), 5000);
+    }
+    if (selectedInterval === 'Weekly' && progress === 100 && filteredHabits.length > 0) {
+      setShowWeeklyConfetti(true);
+      setTimeout(() => setShowWeeklyConfetti(false), 5000);
+    }
+  }, [progress, selectedInterval, filteredHabits.length]);
+
+  // NOW WE CAN HAVE CONDITIONAL RETURNS
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5B4CCC] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Event handlers
   const handleCreateHabit = async (name: string, icon: string, interval: string) => {
     if (!user) return;
     const newHabit = {
@@ -160,7 +188,6 @@ export default function Habits() {
     }
   };
 
-  // Mark habit as completed in Supabase
   const handleToggleHabit = async (habitId: string) => {
     if (!user) return;
     const alreadyCompleted = completions.some(c => c.habit_id === habitId);
@@ -196,16 +223,22 @@ export default function Habits() {
     }
   };
 
-  useEffect(() => {
-    const calendarApi = calendarRef.current?.getApi?.();
-    if (calendarApi) {
-      Promise.resolve().then(() => {
-        calendarApi.changeView(getCalendarView(selectedInterval));
-      });
+  const handleDeleteHabit = async (habitId: string) => {
+    if (!user) return;
+    if (!window.confirm('Are you sure you want to delete this habit?')) return;
+    const { error } = await supabase
+      .from('habits')
+      .delete()
+      .eq('id', habitId)
+      .eq('user_id', user.id);
+    if (error) {
+      alert('Error deleting habit: ' + error.message);
+    } else {
+      setHabits(habits => habits.filter(h => h.id !== habitId));
     }
-  }, [selectedInterval]);
+  };
 
-  // Show daily habits in all views, weekly in weekly/monthly, monthly in monthly only
+  // Calendar events
   const calendarEvents = habits
     .filter(habit => {
       if (selectedInterval === 'Daily') return habit.interval === 'Daily';
@@ -224,7 +257,6 @@ export default function Habits() {
       },
     }));
 
-  // Custom event renderer for FullCalendar
   const eventContent = (arg: any) => {
     const iconId = arg.event.extendedProps.icon;
     const IconComponent = iconMap[iconId as keyof typeof iconMap];
@@ -234,56 +266,6 @@ export default function Habits() {
         <span>{arg.event.title}</span>
       </div>
     );
-  };
-
-  if (!isLoaded) {
-    // Hooks above ensure consistent order
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5B4CCC] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Calculate progress for selected interval
-  const filteredHabits = habits.filter(habit => {
-    if (selectedInterval === 'Daily') return habit.interval === 'Daily';
-    if (selectedInterval === 'Weekly') return habit.interval === 'Daily' || habit.interval === 'Weekly';
-    if (selectedInterval === 'Monthly') return habit.interval === 'Daily' || habit.interval === 'Weekly' || habit.interval === 'Monthly';
-    return false;
-  });
-  const completedCount = filteredHabits.filter(habit => completions.some(c => c.habit_id === habit.id)).length;
-  const progress = filteredHabits.length > 0 ? (completedCount / filteredHabits.length) * 100 : 0;
-
-  // Confetti for 100% daily completion
-  useEffect(() => {
-    if (selectedInterval === 'Daily' && progress === 100) {
-      setShowDailyConfetti(true);
-  setTimeout(() => setShowDailyConfetti(false), 5000);
-    }
-    if (selectedInterval === 'Weekly' && progress === 100) {
-      setShowWeeklyConfetti(true);
-  setTimeout(() => setShowWeeklyConfetti(false), 5000);
-    }
-  }, [progress, selectedInterval]);
-
-  // Delete habit handler
-  const handleDeleteHabit = async (habitId: string) => {
-    if (!user) return;
-    if (!window.confirm('Are you sure you want to delete this habit?')) return;
-    const { error } = await supabase
-      .from('habits')
-      .delete()
-      .eq('id', habitId)
-      .eq('user_id', user.id);
-    if (error) {
-      alert('Error deleting habit: ' + error.message);
-    } else {
-      setHabits(habits => habits.filter(h => h.id !== habitId));
-    }
   };
 
   return (
