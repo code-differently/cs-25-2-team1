@@ -74,6 +74,8 @@ export default function Habits() {
   };
   const [selectedInterval, setSelectedInterval] = useState<string>('Daily');
 
+  // All hooks must be called before any conditional return
+  // ...existing hook calls...
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
