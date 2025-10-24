@@ -108,7 +108,7 @@ export const useDailyQuote = () => {
     return data.data as MotivationalQuote;
   };
 
-  const loadQuote = async () => {
+  const loadQuote = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     // First, try to get cached quote
@@ -144,7 +144,7 @@ export const useDailyQuote = () => {
         error: null // Don't show error to user, we have fallback
       });
     }
-  };
+  }, []);
 
   const refreshQuote = async () => {
     // Clear cache and fetch new quote

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 import { useEffect, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import ProgressTracker from '../components/progress-tracker';
 import WeeklyStreak from '../components/weekly-streak';
@@ -52,6 +53,8 @@ const iconMap = {
 };
 
 export default function Habits() {
+  // Track previous progress to avoid infinite loop
+  const prevProgressRef = useRef<number>(0);
   // ALL HOOKS MUST BE AT THE TOP - BEFORE ANY CONDITIONAL RETURNS
   const { user, isLoaded } = useUser();
   const router = useRouter();
@@ -80,15 +83,23 @@ export default function Habits() {
     return '#f3f4f6';
   };
 
-  // Calculate filtered habits and progress
-  const filteredHabits = habits.filter(habit => {
-    if (selectedInterval === 'Daily') return habit.interval === 'Daily';
-    if (selectedInterval === 'Weekly') return habit.interval === 'Daily' || habit.interval === 'Weekly';
-    if (selectedInterval === 'Monthly') return habit.interval === 'Daily' || habit.interval === 'Weekly' || habit.interval === 'Monthly';
-    return false;
-  });
-  const completedCount = filteredHabits.filter(habit => completions.some(c => c.habit_id === habit.id)).length;
-  const progress = filteredHabits.length > 0 ? (completedCount / filteredHabits.length) * 100 : 0;
+  // Calculate filtered habits and progress using useMemo for correct updates
+  const filteredHabits = useMemo(() => {
+    return habits.filter(habit => {
+      if (selectedInterval === 'Daily') return habit.interval === 'Daily';
+      if (selectedInterval === 'Weekly') return habit.interval === 'Daily' || habit.interval === 'Weekly';
+      if (selectedInterval === 'Monthly') return habit.interval === 'Daily' || habit.interval === 'Weekly' || habit.interval === 'Monthly';
+      return false;
+    });
+  }, [habits, selectedInterval]);
+
+  const completedCount = useMemo(() => {
+    return filteredHabits.filter(habit => completions.some(c => c.habit_id === habit.id)).length;
+  }, [filteredHabits, completions]);
+
+  const progress = useMemo(() => {
+    return filteredHabits.length > 0 ? (completedCount / filteredHabits.length) * 100 : 0;
+  }, [filteredHabits, completedCount]);
 
   // ALL useEffect HOOKS - MUST BE BEFORE ANY CONDITIONAL RETURNS
   useEffect(() => {
@@ -134,15 +145,28 @@ export default function Habits() {
     }
   }, [selectedInterval]);
 
+  
   useEffect(() => {
-    if (selectedInterval === 'Daily' && progress === 100 && filteredHabits.length > 0) {
+    // Only trigger confetti when progress transitions to 100
+    if (
+      selectedInterval === 'Daily' &&
+      progress === 100 &&
+      prevProgressRef.current < 100 &&
+      filteredHabits.length > 0
+    ) {
       setShowDailyConfetti(true);
       setTimeout(() => setShowDailyConfetti(false), 5000);
     }
-    if (selectedInterval === 'Weekly' && progress === 100 && filteredHabits.length > 0) {
+    if (
+      selectedInterval === 'Weekly' &&
+      progress === 100 &&
+      prevProgressRef.current < 100 &&
+      filteredHabits.length > 0
+    ) {
       setShowWeeklyConfetti(true);
       setTimeout(() => setShowWeeklyConfetti(false), 5000);
     }
+    prevProgressRef.current = progress;
   }, [progress, selectedInterval, filteredHabits.length]);
 
   // NOW WE CAN HAVE CONDITIONAL RETURNS
