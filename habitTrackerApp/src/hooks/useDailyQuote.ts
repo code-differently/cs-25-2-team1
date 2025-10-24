@@ -155,7 +155,7 @@ export const useDailyQuote = () => {
 
   useEffect(() => {
     loadQuote();
-  }, []);
+  }, [loadQuote]);
 
   return {
     quote: state.quote,

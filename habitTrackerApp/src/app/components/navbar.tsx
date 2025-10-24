@@ -45,9 +45,7 @@ export const Navbar: FC<NavbarProps> = ({}) => {
                 <Link href="/habits" className="nav-link hover:bg-indigo-500 hover:text-neutral-950 active:bg-indigo-800 text-center w-full py-2 rounded">
                     Habits
                 </Link>
-                <Link href="/calendar" className="nav-link hover:bg-indigo-500 hover:text-neutral-950 active:bg-indigo-800 text-center w-full py-2 rounded">
-                    Calendar
-                </Link>
+                {/* Calendar link removed */}
                 <Link href="/journaling" className="nav-link hover:bg-indigo-500 hover:text-neutral-950 active:bg-indigo-800 text-center w-full py-2 rounded">
                     Journaling
                 </Link>
@@ -103,13 +101,7 @@ export const Navbar: FC<NavbarProps> = ({}) => {
                                 >
                                     Habits
                                 </Link>
-                                <Link 
-                                    href="/calendar" 
-                                    className="block nav-link hover:bg-indigo-500 hover:text-neutral-950 active:bg-indigo-800 text-center w-full py-2 rounded transition-colors duration-200"
-                                    onClick={toggleMobileMenu}
-                                >
-                                    Calendar
-                                </Link>
+                                {/* Calendar link removed */}
                                 <Link 
                                     href="/journaling" 
                                     className="block nav-link hover:bg-indigo-500 hover:text-neutral-950 active:bg-indigo-800 text-center w-full py-2 rounded transition-colors duration-200"
