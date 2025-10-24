@@ -145,6 +145,7 @@ export default function Habits() {
     }
   }, [selectedInterval]);
 
+  
   useEffect(() => {
     // Only trigger confetti when progress transitions to 100
     if (
