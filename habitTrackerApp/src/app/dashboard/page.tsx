@@ -88,7 +88,7 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Habit Creation Modal */}
+      {/* Habit Creation Modal*/}
       <HabitModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
