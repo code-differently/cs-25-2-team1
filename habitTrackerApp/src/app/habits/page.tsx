@@ -56,19 +56,8 @@ const iconMap = {
 
 export default function Habits() {
 
-  const { user, isLoaded } = useUser();
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5B4CCC] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   // All hooks must be called before any conditional return
+  const { user, isLoaded } = useUser();
   const [showDailyConfetti, setShowDailyConfetti] = useState(false);
   const [showWeeklyConfetti, setShowWeeklyConfetti] = useState(false);
   const router = useRouter();
@@ -84,6 +73,17 @@ export default function Habits() {
     return 'dayGridMonth';
   };
   const [selectedInterval, setSelectedInterval] = useState<string>('Daily');
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5B4CCC] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (isLoaded && !user) {
