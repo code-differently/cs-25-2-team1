@@ -1,6 +1,6 @@
 // src/app/login/page.tsx
-'use client'
-import { useSignIn } from '@clerk/nextjs'
+"use client"
+import { useSignIn, useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -10,12 +10,20 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { signIn, setActive } = useSignIn()
+  const { isSignedIn } = useUser();
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    if (isSignedIn) {
+      setError("You're already signed in.");
+      setLoading(false);
+      router.push('/dashboard');
+      return;
+    }
 
     if (!signIn) {
       setError('Login service not available')
