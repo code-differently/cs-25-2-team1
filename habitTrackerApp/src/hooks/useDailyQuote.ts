@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { MotivationalQuote } from '../types/api';
 
 interface QuoteState {
@@ -108,7 +108,7 @@ export const useDailyQuote = () => {
     return data.data as MotivationalQuote;
   };
 
-  const loadQuote = async () => {
+  const loadQuote = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     // First, try to get cached quote
@@ -144,18 +144,18 @@ export const useDailyQuote = () => {
         error: null // Don't show error to user, we have fallback
       });
     }
-  };
+  }, []); // Empty dependency array since we don't depend on any props or state
 
-  const refreshQuote = async () => {
+  const refreshQuote = useCallback(async () => {
     // Clear cache and fetch new quote
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(DATE_KEY);
     await loadQuote();
-  };
+  }, [loadQuote]);
 
   useEffect(() => {
     loadQuote();
-  }, [loadQuote]);
+  }, [loadQuote]); // Now we can safely depend on loadQuote since it's memoized
 
   return {
     quote: state.quote,

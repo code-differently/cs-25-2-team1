@@ -1,14 +1,15 @@
 'use client'
-import { useUser, useClerk } from '@clerk/nextjs';
+import { useClerk, useUser } from '@clerk/nextjs';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import Confetti from 'react-confetti';
+import { ensureUserExists } from '../../lib/userSync';
 import HabitModal from '../components/habit-modal';
-import ProgressTracker from "../components/progress-tracker";
 import MoodAndQuote from "../components/mood-and-quotes";
+import ProgressTracker from "../components/progress-tracker";
 import ToDoList from "../components/todo-list";
 import WeeklyStreak from "../components/weekly-streak";
-import Confetti from 'react-confetti';
 import { Welcome } from "../components/welcome";
 
 // Define the Habit type (matching the one in todo-list.tsx)
@@ -42,20 +43,33 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchHabitsAndCompletions = async () => {
       if (!user) return;
+      // Ensure user profile exists for Clerk users using proper sync
+      await ensureUserExists(user);
+
       const { data: habitsData, error: habitsError } = await supabase
         .from('habits')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id_text', user.id); // Use user_id_text column
       if (habitsError) {
         console.error('Error fetching habits:', habitsError.message);
       } else if (habitsData) {
-        setHabits(habitsData);
+        // Map schema fields to component fields
+        const mappedHabits = habitsData.map(habit => ({
+          id: habit.id,
+          name: habit.title, // Map title -> name for component
+          icon: '📋', // Default icon since not stored in schema
+          interval: habit.frequency, // Map frequency -> interval
+          completed: false // Will be set based on completions
+        }));
+        setHabits(mappedHabits);
       }
+      
       const { data: completionsData, error: completionsError } = await supabase
-        .from('habit_completions')
+        .from('habit_logs') // Use correct table name
         .select('habit_id')
-        .eq('user_id', user.id)
-        .eq('completed_at', new Date().toISOString().split('T')[0]); // Only today's completions
+        .eq('user_id_text', user.id) // Use user_id_text column
+        .gte('completed_at', new Date().toISOString().split('T')[0]) // Today's completions
+        .lt('completed_at', new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0]);
       if (completionsError) {
         console.error('Error fetching completions:', completionsError.message);
       } else if (completionsData) {
@@ -67,35 +81,83 @@ export default function Dashboard() {
     }
   }, [isLoaded, user, supabase]);
 
-  // Create daily habit in Supabase
+  // Create habit in Supabase (supports daily, weekly, monthly)
   const handleCreateHabit = async (name: string, icon: string, interval: string) => {
-    if (!user) return;
-    if (interval !== 'Daily') return; // Only allow daily habits from dashboard
-    const newHabit = {
-      user_id: user.id,
-      name,
-      icon,
-      interval,
-      created_at: new Date().toISOString(),
-    };
-    const { error } = await supabase
-      .from('habits')
-      .insert([newHabit]);
-    if (error) {
-      console.error('Error creating daily habit:', error.message);
-    } else {
-      // Refetch daily habits after insert
+    console.log('handleCreateHabit called with:', { name, icon, interval });
+    
+    if (!user) {
+      console.error('No user found when creating habit');
+      return;
+    }
+    
+    try {
+      console.log('User:', user.id);
+      
+      // First ensure user profile exists using proper sync
+      console.log('Ensuring user exists...');
+      const userSyncResult = await ensureUserExists(user);
+      console.log('User sync result:', userSyncResult);
+
+      // Habit object with both old and new user ID columns for compatibility
+      const newHabit = {
+        user_id: null, // Set old column to null (will be nullable after migration)
+        user_id_text: user.id, // Use user_id_text for Clerk compatibility
+        title: name, // Use 'title' to match schema
+        frequency: interval.toLowerCase(), // Use 'frequency' to match schema  
+      };
+      
+      console.log('Creating habit:', newHabit);
+      
+      const { data, error } = await supabase
+        .from('habits')
+        .insert([newHabit])
+        .select();
+      
+      if (error) {
+        console.error('Error creating habit:', error.message);
+        console.error('Full error details:', error);
+        return;
+      }
+      
+      console.log('Habit created successfully:', data);
+      
+      // Refetch all habits to update the UI
       const { data: habitsData, error: habitsError } = await supabase
         .from('habits')
         .select('*')
-        .eq('user_id', user.id)
-        .eq('interval', 'Daily');
+        .eq('user_id_text', user.id);
+        
       if (habitsError) {
-        console.error('Error fetching daily habits:', habitsError.message);
+        console.error('Error fetching habits:', habitsError.message);
       } else if (habitsData) {
-        setHabits(habitsData);
+        const mappedHabits = habitsData.map(habit => ({
+          id: habit.id,
+          name: habit.title,
+          icon: '📋',
+          interval: habit.frequency,
+          completed: false
+        }));
+        console.log('Refetched habits after creation:', mappedHabits);
+        setHabits(mappedHabits);
       }
+      
+      // Refetch completions
+      const { data: completionsData, error: completionsError } = await supabase
+        .from('habit_logs')
+        .select('habit_id')
+        .eq('user_id_text', user.id)
+        .gte('completed_at', new Date().toISOString().split('T')[0])
+        .lt('completed_at', new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0]);
+        
+      if (completionsError) {
+        console.error('Error fetching completions:', completionsError.message);
+      } else if (completionsData) {
+        setCompletions(completionsData);
+      }
+      
       setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error in handleCreateHabit:', error);
     }
   };
 
@@ -107,10 +169,10 @@ export default function Dashboard() {
     if (alreadyCompleted) {
       // Remove completion
       const { error } = await supabase
-        .from('habit_completions')
+        .from('habit_logs') // Use correct table name
         .delete()
         .eq('habit_id', habitId)
-        .eq('user_id', user.id)
+        .eq('user_id_text', user.id) // Use user_id_text column
         .eq('completed_at', new Date().toISOString().split('T')[0]);
       if (error) {
         console.error('Error removing completion:', error.message);
@@ -121,11 +183,11 @@ export default function Dashboard() {
     }
     // Add completion
     const { error } = await supabase
-      .from('habit_completions')
+      .from('habit_logs') // Use correct table name
       .insert([
         {
           habit_id: habitId,
-          user_id: user.id,
+          user_id_text: user.id, // Use user_id_text column
           completed_at: new Date().toISOString().split('T')[0],
         },
       ]);
