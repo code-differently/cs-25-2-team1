@@ -101,13 +101,12 @@ describe('ToDoList Component', () => {
   });
 
   it('calls onToggleHabit when habit item is clicked', () => {
-    const mockToggle = jest.fn();
-    render(<ToDoList {...defaultProps} onToggleHabit={mockToggle} />);
-    
-    const habitItem = screen.getByText('Morning Exercise').closest('div');
-    fireEvent.click(habitItem!);
-    
-    expect(mockToggle).toHaveBeenCalledWith('1');
+  const mockToggle = jest.fn();
+  render(<ToDoList {...defaultProps} onToggleHabit={mockToggle} />);
+  // Click the icon for 'Morning Exercise' (first incomplete habit, so first circle icon)
+  const icon = screen.getAllByTestId('circle-icon')[0];
+  fireEvent.click(icon);
+  expect(mockToggle).toHaveBeenCalledWith('1');
   });
 
   it('displays habit intervals correctly', () => {
