@@ -111,6 +111,7 @@ export default function Journaling() {
           events={noteEvents}
           eventContent={eventContent}
           height="auto"
+          buttonText={{ today: 'Today' }}
         />
       </div>
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-md p-6 flex flex-col gap-4">

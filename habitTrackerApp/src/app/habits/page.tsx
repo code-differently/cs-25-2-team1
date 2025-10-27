@@ -25,6 +25,7 @@ interface Habit {
   interval: string;
   completed: boolean;
   color: string;
+  created_at: string;
 }
 
 const INTERVALS = ['Daily', 'Weekly', 'Monthly'];
@@ -77,9 +78,9 @@ export default function Habits() {
   };
 
   const getIntervalColor = (interval: string) => {
-    if (interval === 'Daily') return '#bfdbfe';
-    if (interval === 'Weekly') return '#fecaca';
-    if (interval === 'Monthly') return '#fef9c3';
+    if (interval === 'Daily') return '#bfdbfe'; // blue-200
+    if (interval === 'Weekly') return '#fecaca'; // red-200
+    if (interval === 'Monthly') return '#e9d5ff'; // light purple (purple-200)
     return '#f3f4f6';
   };
 
@@ -250,6 +251,18 @@ export default function Habits() {
   const handleDeleteHabit = async (habitId: string) => {
     if (!user) return;
     if (!window.confirm('Are you sure you want to delete this habit?')) return;
+    // First, delete all completions for this habit
+    const { error: completionsError } = await supabase
+      .from('habit_completions')
+      .delete()
+      .eq('habit_id', habitId);
+    if (completionsError) {
+      alert('Error deleting habit completions: ' + completionsError.message);
+      return;
+    }
+    // Wait a moment to ensure Supabase processes the deletion
+    await new Promise(resolve => setTimeout(resolve, 300));
+    // Then, delete the habit itself
     const { error } = await supabase
       .from('habits')
       .delete()
@@ -259,27 +272,75 @@ export default function Habits() {
       alert('Error deleting habit: ' + error.message);
     } else {
       setHabits(habits => habits.filter(h => h.id !== habitId));
+      setCompletions(completions => completions.filter(c => c.habit_id !== habitId));
     }
   };
 
-  // Calendar events
+  // Calendar events: show habits on all appropriate days based on interval
+  function getRecurringEventDates(habit: Habit, rangeStart: Date, rangeEnd: Date): string[] {
+    const dates: string[] = [];
+    const created = new Date(habit.created_at || new Date());
+    if (habit.interval === 'Daily') {
+      // Daily: repeat forever
+      let current = new Date(Math.max(created.getTime(), rangeStart.getTime()));
+      while (current <= rangeEnd) {
+        dates.push(current.toISOString().split('T')[0]);
+        current.setDate(current.getDate() + 1);
+      }
+    } else if (habit.interval === 'Weekly') {
+      // Weekly: show every day for 7 days after creation
+      let lastDate = new Date(created);
+      lastDate.setDate(created.getDate() + 6); // 7 days window
+      if (lastDate > rangeEnd) lastDate = rangeEnd;
+      let current = new Date(Math.max(created.getTime(), rangeStart.getTime()));
+      while (current <= lastDate) {
+        dates.push(current.toISOString().split('T')[0]);
+        current.setDate(current.getDate() + 1);
+      }
+    } else if (habit.interval === 'Monthly') {
+      // Monthly: show every day for 30 days after creation
+      let lastDate = new Date(created);
+      lastDate.setDate(created.getDate() + 29); // 30 days window
+      if (lastDate > rangeEnd) lastDate = rangeEnd;
+      let current = new Date(Math.max(created.getTime(), rangeStart.getTime()));
+      while (current <= lastDate) {
+        dates.push(current.toISOString().split('T')[0]);
+        current.setDate(current.getDate() + 1);
+      }
+    }
+    return dates;
+  }
+
+  // Calculate visible range for calendar (expand far into the future for daily habits)
+  const today = new Date();
+  const rangeStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  rangeStart.setDate(rangeStart.getDate() - 7);
+  // Show 2 years into the future so daily habits appear "forever"
+  const rangeEnd = new Date(today.getFullYear() + 2, today.getMonth(), today.getDate());
+
   const calendarEvents = habits
     .filter(habit => {
-      if (selectedInterval === 'Daily') return habit.interval === 'Daily';
-      if (selectedInterval === 'Weekly') return habit.interval === 'Daily' || habit.interval === 'Weekly';
-      if (selectedInterval === 'Monthly') return habit.interval === 'Daily' || habit.interval === 'Weekly' || habit.interval === 'Monthly';
-      return false;
+      // Show all habits (daily, weekly, monthly) in all views
+      return (
+        selectedInterval === 'Daily' ||
+        selectedInterval === 'Weekly' ||
+        selectedInterval === 'Monthly'
+      ) && (habit.interval === 'Daily' || habit.interval === 'Weekly' || habit.interval === 'Monthly');
     })
-    .map(habit => ({
-      id: habit.id,
-      title: habit.name,
-      start: new Date().toISOString().split('T')[0],
-      color: getIntervalColor(habit.interval),
-      extendedProps: {
-        icon: habit.icon,
-        completed: completions.some(c => c.habit_id === habit.id),
-      },
-    }));
+    .flatMap(habit => {
+      // For each habit, generate all event dates in range
+      const eventDates = getRecurringEventDates(habit, rangeStart, rangeEnd);
+      return eventDates.map(dateStr => ({
+        id: habit.id + '-' + dateStr,
+        title: habit.name,
+        start: dateStr,
+        color: getIntervalColor(habit.interval),
+        extendedProps: {
+          icon: habit.icon,
+          completed: completions.some(c => c.habit_id === habit.id),
+        },
+      }));
+    });
 
   const eventContent = (arg: any) => {
     const iconId = arg.event.extendedProps.icon;

@@ -1,6 +1,7 @@
 import { Briefcase, Check, Coffee, Heart, Lightbulb, Lock, Sparkles, X, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 
+
 interface HabitModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,7 +13,7 @@ const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, onCreateHabit 
     name: '',
     description: '',
     interval: '',
-    icon: null as string | null
+    icon: null as string | null,
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -112,6 +113,8 @@ const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, onCreateHabit 
             </div>
           )}
         </div>
+
+
 
         {/* Icons */}
         <div className="mb-6">

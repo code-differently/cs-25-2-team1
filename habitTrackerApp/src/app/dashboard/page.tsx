@@ -67,10 +67,9 @@ export default function Dashboard() {
     }
   }, [isLoaded, user, supabase]);
 
-  // Create daily habit in Supabase
+  // Create habit in Supabase (any interval)
   const handleCreateHabit = async (name: string, icon: string, interval: string) => {
     if (!user) return;
-    if (interval !== 'Daily') return; // Only allow daily habits from dashboard
     const newHabit = {
       user_id: user.id,
       name,
@@ -82,16 +81,15 @@ export default function Dashboard() {
       .from('habits')
       .insert([newHabit]);
     if (error) {
-      console.error('Error creating daily habit:', error.message);
+      console.error('Error creating habit:', error.message);
     } else {
-      // Refetch daily habits after insert
+      // Refetch all habits after insert
       const { data: habitsData, error: habitsError } = await supabase
         .from('habits')
         .select('*')
-        .eq('user_id', user.id)
-        .eq('interval', 'Daily');
+        .eq('user_id', user.id);
       if (habitsError) {
-        console.error('Error fetching daily habits:', habitsError.message);
+        console.error('Error fetching habits:', habitsError.message);
       } else if (habitsData) {
         setHabits(habitsData);
       }
