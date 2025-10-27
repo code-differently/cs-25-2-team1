@@ -1,139 +1,153 @@
-# Habit Tracker — User Stories
+# Habit Tracker Application
 
---- 
-### **User Story 1**
+A comprehensive habit tracking application built with Next.js and Supabase that helps users build and maintain positive habits through streak tracking, progress visualization, and motivational rewards.
 
-**As a user,** I want to sign up, sign in, and sign out securely so that my habits and progress are saved.
+## The Team
 
-**Acceptance Criteria:**
-* Validates user credentials
-* Persists user sessions
+- **Evander Blue** - Developer
+- **Kerry Ferguson** - Developer  
+- **Mattie Weathersby** - Developer
+- **Jaizel Cespedes** - Developer
+
+## Screenshot
+
+![Habit Tracker App Screenshot](habitTrackerApp/streakr_Screenshot/streakr_screenshot.png)
+
+## Description
+
+The Habit Tracker app is a modern web application designed to help users build and maintain positive habits through gamification and visual progress tracking. Key features include:
+
+- **User Authentication**: Secure sign-up, sign-in, and session management
+- **Profile Management**: Customizable user profiles with avatar support
+- **Habit Creation & Management**: Create, edit, and delete custom habits with flexible scheduling
+- **Streak Tracking**: Visual streak counters with fire emoji indicators
+- **Progress Visualization**: Interactive charts and completion history
+- **Milestone Rewards**: Badge system and celebratory animations for achievements
+- **Motivational Features**: Confetti animations and encouraging messages for streak milestones
+
+Built with modern web technologies including Next.js 15, React 19, Supabase for backend services, Clerk for authentication, and Chart.js for data visualization.
+
+## Demo Link
+
+https://cs-25-2-team1.vercel.app/login
+
+## Installation Instructions
+
+### Prerequisites
+
+- Node.js (version 18 or higher)
+- npm or yarn package manager
+- Git
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/code-differently/cs-25-2-team1.git
+   cd cs-25-2-team1/habitTrackerApp
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Environment Configuration:**
+   - Copy `.env.local.example` to `.env.local`
+   - Configure the following environment variables:
+     ```
+     NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+     NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
+     CLERK_SECRET_KEY=your_clerk_secret
+     ```
+
+4. **Database Setup:**
+   - Set up Supabase project and configure authentication
+   - Run the database migration scripts in `/database/schema.sql`
+   - Optionally set up Google Calendar integration using `/database/google-calendar-schema.sql`
+
+5. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+6. **Access the application:**
+   - Open [http://localhost:3000](http://localhost:3000) in your browser
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm test` - Run test suite
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Generate test coverage reports
+
+## Known Issues
+
+*This section will be updated with known issues as they are identified during development and testing.*
+
+## Roadmap Features
+
+### Phase 1 - Core Functionality ✅
+- [x] User authentication and profile management
+- [x] Basic habit creation and tracking
+- [x] Streak counting and completion marking
+- [x] Simple progress visualization
+
+### Phase 2 - Enhanced Features 
+
+- [ ] Advanced analytics and reporting
+- [ ] Social features (habit sharing, friends)
+- [ ] Mobile app development (React Native)
+- [ ] Offline synchronization
+- [ ] Advanced notification system
+
+### Phase 3 - Integrations 
+- [ ] Google Calendar integration
+- [ ] Wearable device connectivity (Fitbit, Apple Watch)
+- [ ] Third-party app integrations (Strava, MyFitnessPal)
+- [ ] AI-powered habit recommendations
+- [ ] Voice assistant integration
+
+### Phase 4 - Enterprise Features
+- [ ] Team habit tracking for organizations
+- [ ] Admin dashboard and analytics
+- [ ] Custom branding options
+- [ ] API for third-party integrations
+- [ ] Advanced security and compliance features
+
+### Future Considerations
+- [ ] Habit templates and community sharing
+- [ ] Gamification enhancements (leaderboards, challenges)
+- [ ] Machine learning for personalized insights
+- [ ] Multi-language support
+- [ ] Accessibility improvements
+
+## Credits
+
+### Development Team
+- **Evander Blue** - Lead Full Stack Developer, Database Design
+- **Kerry Ferguson** - Full Stack Developer, Frontend Architecture
+- **Mattie Weathersby** - UI/UX Designer, Testing
+- **Jaizel Cespedes** - Backend Developer, Integration Development
+
+### Technologies & Libraries
+- **Next.js** - React framework for production
+- **Supabase** - Backend as a service, database, and authentication
+- **Clerk** - Authentication and user management
+- **Tailwind CSS** - Utility-first CSS framework
+- **Lucide React** - Icon library
+- **Chart.js/Recharts** - Data visualization
+- **React Confetti** - Celebration animations
+- **Jest & React Testing Library** - Testing framework
+- **TypeScript** - Type safety and development experience
+
+### Special Thanks
+- Code Differently organization for project guidance and mentorship
+- The open-source community for the excellent tools and libraries
+- All contributors and testers who helped improve the application
 
 ---
-
-### **User Story 2**
-
-**As a user,** I want to edit my profile (name, avatar, email) so I can personalize my dashboard.
-
-**Acceptance Criteria:**
-* Allows updating profile fields
-* Option to upload or choose an avatar
-* Saves changes to user profile in the database
-
----
-
-### **User Story 2**
-
-**As a user,** I want to create a new habit with a name, goal frequency (e.g., daily, weekly), and category so that I can track it over time.
-
-**Acceptance Criteria:**
-* Form includes fields for habit name, frequency, and category
-* Saves new habits to dashboard list
-* Displays confirmation on successful creation
-
----
-
-### **User Story 3**
-
-**As a user,** I want to mark a habit as completed for today so I can maintain a streak.
-
-**Acceptance Criteria:**
-* Completion updates displayed instantly in UI
-* Streak counter increments correctly
-* Updates persisted in backend
-
----
-
-### **User Story 5**
-
-**As a user,** I want to edit or delete habits so I can keep my list up to date.
-
-**Acceptance Criteria:**
-* Edit modal allows updating habit details
-* Deleting shows a confirmation prompt
-* Habit list refreshes automatically
-
----
-
-### **User Story 4**
-
-**As a user,** I want to see my streak count and completion history per habit so I can stay motivated.
-
-**Acceptance Criteria:**
-* Displays streak counter (🔥)
-* Shows daily completion grid or mini calendar view
-* Fetches streak data from backend
-
----
-
-### **User Story 5**
-
-**As a user,** I want to see an overview dashboard of my habit progress with charts so I can visualize consistency.
-
-**Acceptance Criteria:**
-* Dashboard uses **Recharts** or **Chart.js**
-* Displays weekly or monthly completion stats
-* Responsive and accessible charts
-
----
-
-### **User Story 6**
-
-**As a user,** I want to earn badges or milestones for completing streaks (e.g., “7 days in a row”) so I feel rewarded.
-
-**Acceptance Criteria:**
-* Tracks milestone achievements
-* Displays badges or celebration modal
-* Optional stretch: animated celebration popup
-
----
-
-### **User Story 7**
-
-**As a user,** I want to see motivational messages or confetti animations when I hit streak milestones so it feels rewarding.
-
-**Acceptance Criteria:**
-* Trigger animations or messages upon milestones
-* Uses **framer-motion** for transitions or effects
-* Non-blocking and reusable animation component
-
----
-
-### **User Story 10**
-
-**As a user,** I want to have a leaderboard showing top streaks among all users so I can compete socially.
-
-**Acceptance Criteria:**
-* Displays global leaderboard (username + streak)
-* Fetches and sorts data by streak count
-* Optional: toggle between global and friends view
-
----
-
-## Epic 5: UI/UX Polish & Accessibility
-
-**Goal:** Make the app feel professional and easy to use.
-
----
-
-### **User Story 8**
-
-**As a user,** I want a clean dashboard with clear visual hierarchy and progress indicators so I can track habits at a glance.
-
-**Acceptance Criteria:**
-* Uses **Tailwind CSS** for consistent styling
-* Includes progress bars and visual cues
-
----
-
-### **User Story 9**
-
-**As a user,** I want the app to be responsive and accessible across devices so I can use it on my phone or laptop.
-
-**Acceptance Criteria:**
-* Fully responsive layout
-* Keyboard navigable
-* Meets accessibility color contrast standards
-
----------------------------------------------------------------------------------------------------------------
-
+ 
+**Repository:** [cs-25-2-team1](https://github.com/code-differently/cs-25-2-team1)  
+**Last Updated:** October 2025
