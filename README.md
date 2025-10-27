@@ -1,4 +1,4 @@
-# Habit Tracker Application
+# Streakr (Habit Tracker Application)
 
 A comprehensive habit tracking application built with Next.js and Supabase that helps users build and maintain positive habits through streak tracking, progress visualization, and motivational rewards.
 
