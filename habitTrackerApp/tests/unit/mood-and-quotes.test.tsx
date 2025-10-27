@@ -23,10 +23,12 @@ describe('MoodAndQuote Component (with Daily Quotes)', () => {
 
   it('renders mood tracker and daily quote sections', () => {
     render(<MoodAndQuote />);
-    
     expect(screen.getByText('Mood')).toBeInTheDocument();
-    expect(screen.getByText(/Test motivational quote/)).toBeInTheDocument();
-    expect(screen.getByText(/Test Author/)).toBeInTheDocument();
+    // The quote appears in both the main card and the tooltip
+    const quoteElements = screen.getAllByText(/Test motivational quote/);
+    expect(quoteElements.length).toBeGreaterThanOrEqual(1);
+    const authorElements = screen.getAllByText(/Test Author/);
+    expect(authorElements.length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Today I feel...')).toBeInTheDocument();
   });
 

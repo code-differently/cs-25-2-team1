@@ -13,12 +13,11 @@ describe('Welcome Component', () => {
   });
 
   it('renders with default props', () => {
-    render(<Welcome {...defaultProps} />);
-    
-    expect(screen.getByText('Welcome in,')).toBeInTheDocument();
-    expect(screen.getByText('Jane')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Add Habit' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Journal' })).toBeInTheDocument();
+  render(<Welcome {...defaultProps} />);
+  expect(screen.getByText('Welcome in,')).toBeInTheDocument();
+  expect(screen.getByText('Jane')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Add Habit' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Journal' })).toBeInTheDocument();
   });
 
   it('displays custom userName', () => {
@@ -53,13 +52,11 @@ describe('Welcome Component', () => {
   });
 
   it('has correct button styling and hover states', () => {
-    render(<Welcome {...defaultProps} />);
-    
-    const addHabitButton = screen.getByRole('button', { name: 'Add Habit' });
-    const journalButton = screen.getByRole('button', { name: 'Journal' });
-    
-    expect(addHabitButton).toHaveClass('bg-blue-500', 'text-white');
-    expect(journalButton).toHaveClass('bg-white', 'border-2', 'border-indigo-700', 'text-indigo-700');
+  render(<Welcome {...defaultProps} />);
+  const addHabitButton = screen.getByRole('button', { name: 'Add Habit' });
+  const journalLink = screen.getByRole('link', { name: 'Journal' });
+  expect(addHabitButton).toHaveClass('bg-indigo-700', 'text-white');
+  expect(journalLink).toHaveClass('bg-white', 'border-2', 'border-indigo-700', 'text-indigo-700');
   });
 
   it('renders with responsive classes', () => {

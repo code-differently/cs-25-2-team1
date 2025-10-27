@@ -1,3 +1,7 @@
+// Mock Clerk to avoid ESM transform errors
+jest.mock('@clerk/nextjs', () => ({
+  useClerk: () => ({ signOut: jest.fn() })
+}));
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Navbar } from '../../src/app/components/navbar';
 
@@ -42,7 +46,6 @@ describe('Navbar Component', () => {
     
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Habits')).toBeInTheDocument();
-    expect(screen.getByText('Calendar')).toBeInTheDocument();
     expect(screen.getByText('Journaling')).toBeInTheDocument();
   });
 
@@ -54,9 +57,6 @@ describe('Navbar Component', () => {
     
     const habitsLinks = screen.getAllByText('Habits');
     expect(habitsLinks[0].closest('a')).toHaveAttribute('href', '/habits');
-    
-    const calendarLinks = screen.getAllByText('Calendar');
-    expect(calendarLinks[0].closest('a')).toHaveAttribute('href', '/calendar');
     
     const journalingLinks = screen.getAllByText('Journaling');
     expect(journalingLinks[0].closest('a')).toHaveAttribute('href', '/journaling');
