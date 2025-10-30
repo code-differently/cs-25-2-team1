@@ -84,7 +84,8 @@ https://cs-25-2-team1.vercel.app/login
 
 ## Known Issues
 
-*This section will be updated with known issues as they are identified during development and testing.*
+Mood does not save to journaling calendar
+Google sign-in button does not work
 
 ## Roadmap Features
 
